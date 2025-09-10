@@ -1,5 +1,4 @@
-import ChatService from "@token-ring/chat/ChatService";
-import type {Registry} from "@token-ring/registry";
+import Agent from "@tokenring-ai/agent/Agent";
 import {z} from "zod";
 import SandboxService from "../SandboxService.js";
 
@@ -17,10 +16,10 @@ export async function execute(
     environment?: Record<string, string>;
     timeout?: number;
   },
-  registry: Registry,
+  agent: Agent,
 ): Promise<{ containerId: string; status: string }> {
-  const chat = registry.requireFirstServiceByType(ChatService);
-  const sandbox = registry.requireFirstServiceByType(SandboxService);
+  const chat = agent.requireFirstServiceByType(Agent);
+  const sandbox = agent.requireFirstServiceByType(SandboxService);
 
   chat.infoLine(`[${name}] Creating container${image ? ` with image: ${image}` : ""}`);
   const result = await sandbox.createContainer({
@@ -29,7 +28,7 @@ export async function execute(
     environment,
     timeout
   });
-  
+
   chat.infoLine(`[${name}] Container created: ${result.containerId}`);
   return result;
 }
@@ -39,6 +38,6 @@ export const description = "Create a new sandbox container using the active sand
 export const inputSchema = z.object({
   image: z.string().optional().describe("Container image to use"),
   workingDir: z.string().optional().describe("Working directory in container"),
-  environment: z.record(z.string(),z.string()).optional().describe("Environment variables"),
+  environment: z.record(z.string(), z.string()).optional().describe("Environment variables"),
   timeout: z.number().optional().describe("Timeout in seconds"),
 });

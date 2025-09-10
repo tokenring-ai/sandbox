@@ -1,10 +1,17 @@
-import packageJSON from './package.json' with {type: 'json'};
+import {TokenRingPackage} from "@tokenring-ai/agent";
 
-export const name = packageJSON.name;
-export const version = packageJSON.version;
-export const description = packageJSON.description;
+import * as chatCommands from "./chatCommands.ts";
+import packageJSON from './package.json' with {type: 'json'};
+import * as tools from "./tools.ts";
+
+export const packageInfo: TokenRingPackage = {
+  name: packageJSON.name,
+  version: packageJSON.version,
+  description: packageJSON.description,
+  chatCommands,
+  tools
+};
+
 
 export {default as SandboxService} from "./SandboxService.ts";
 export {default as SandboxResource} from "./SandboxProvider.ts";
-export * as tools from "./tools.ts";
-export * as chatCommands from "./chatCommands.ts";

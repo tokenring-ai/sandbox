@@ -1,5 +1,4 @@
-import ChatService from "@token-ring/chat/ChatService";
-import type {Registry} from "@token-ring/registry";
+import Agent from "@tokenring-ai/agent/Agent";
 import {z} from "zod";
 import SandboxService from "../SandboxService.js";
 
@@ -11,10 +10,10 @@ export async function execute(
   }: {
     containerId?: string;
   },
-  registry: Registry,
+  agent: Agent,
 ): Promise<{ success: boolean }> {
-  const chat = registry.requireFirstServiceByType(ChatService);
-  const sandbox = registry.requireFirstServiceByType(SandboxService);
+  const chat = agent.requireFirstServiceByType(Agent);
+  const sandbox = agent.requireFirstServiceByType(SandboxService);
 
   const targetContainer = containerId || sandbox.getActiveContainer();
   if (!targetContainer) {
@@ -23,8 +22,8 @@ export async function execute(
 
   chat.infoLine(`[${name}] Stopping container: ${targetContainer}`);
   await sandbox.stopContainer(targetContainer);
-  
-  return { success: true };
+
+  return {success: true};
 }
 
 export const description = "Stop a sandbox container";

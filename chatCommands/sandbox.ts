@@ -1,6 +1,4 @@
-import {HumanInterfaceService} from "@token-ring/chat";
-import ChatService from "@token-ring/chat/ChatService";
-import type {Registry} from "@token-ring/registry";
+import Agent from "@tokenring-ai/agent/Agent";
 import SandboxService from "../SandboxService.js";
 
 export const description = "/sandbox [action] - Sandbox container operations";
@@ -26,21 +24,20 @@ export function help(): Array<string> {
   ];
 }
 
-export async function execute(remainder: string, registry: Registry): Promise<void> {
-  const chat = registry.requireFirstServiceByType(ChatService);
-  registry.requireFirstServiceByType(HumanInterfaceService);
-  const sandbox = registry.requireFirstServiceByType(SandboxService);
+export async function execute(remainder: string, agent: Agent): Promise<void> {
+  const chat = agent.requireFirstServiceByType(Agent);
+  const sandbox = agent.requireFirstServiceByType(SandboxService);
 
   const [action, ...args] = remainder.trim().split(/\s+/);
   if (!action) {
-    help().forEach((l) => chat.systemLine(l));
+    help().forEach((l) => chat.infoLine(l));
     return;
   }
 
   if (action === "create") {
     const image = args[0];
-    const result = await sandbox.createContainer({ image });
-    chat.systemLine(`Container created: ${result.containerId} (${result.status})`);
+    const result = await sandbox.createContainer({image});
+    chat.infoLine(`Container created: ${result.containerId} (${result.status})`);
   } else if (action === "exec") {
     const command = args.join(" ");
     if (!command) {
@@ -53,9 +50,9 @@ export async function execute(remainder: string, registry: Registry): Promise<vo
       return;
     }
     const result = await sandbox.executeCommand(activeContainer, command);
-    if (result.stdout) chat.systemLine(`stdout: ${result.stdout}`);
+    if (result.stdout) chat.infoLine(`stdout: ${result.stdout}`);
     if (result.stderr) chat.errorLine(`stderr: ${result.stderr}`);
-    chat.systemLine(`Exit code: ${result.exitCode}`);
+    chat.infoLine(`Exit code: ${result.exitCode}`);
   } else if (action === "stop") {
     const containerId = args[0] || sandbox.getActiveContainer();
     if (!containerId) {
@@ -63,7 +60,7 @@ export async function execute(remainder: string, registry: Registry): Promise<vo
       return;
     }
     await sandbox.stopContainer(containerId);
-    chat.systemLine(`Container stopped: ${containerId}`);
+    chat.infoLine(`Container stopped: ${containerId}`);
   } else if (action === "logs") {
     const containerId = args[0] || sandbox.getActiveContainer();
     if (!containerId) {
@@ -71,7 +68,7 @@ export async function execute(remainder: string, registry: Registry): Promise<vo
       return;
     }
     const result = await sandbox.getLogs(containerId);
-    chat.systemLine(`Logs:\n${result.logs}`);
+    chat.infoLine(`Logs:\n${result.logs}`);
   } else if (action === "remove") {
     const containerId = args[0] || sandbox.getActiveContainer();
     if (!containerId) {
@@ -79,23 +76,23 @@ export async function execute(remainder: string, registry: Registry): Promise<vo
       return;
     }
     await sandbox.removeContainer(containerId);
-    chat.systemLine(`Container removed: ${containerId}`);
+    chat.infoLine(`Container removed: ${containerId}`);
   } else if (action === "status") {
     const activeContainer = sandbox.getActiveContainer();
     const activeProvider = sandbox.getActiveSandboxProviderName();
-    chat.systemLine(`Active container: ${activeContainer || "none"}`);
-    chat.systemLine(`Active provider: ${activeProvider || "none"}`);
+    chat.infoLine(`Active container: ${activeContainer || "none"}`);
+    chat.infoLine(`Active provider: ${activeProvider || "none"}`);
   } else if (action === "provider") {
     if (args[0]) {
       sandbox.setActiveSandboxProviderName(args[0]);
-      chat.systemLine(`Active provider set to: ${args[0]}`);
+      chat.infoLine(`Active provider set to: ${args[0]}`);
     } else {
       const active = sandbox.getActiveSandboxProviderName();
       const available = sandbox.getAvailableSandboxProviders();
-      chat.systemLine(`Active provider: ${active || "none"}`);
-      chat.systemLine(`Available providers: ${available.join(", ")}`);
+      chat.infoLine(`Active provider: ${active || "none"}`);
+      chat.infoLine(`Available providers: ${available.join(", ")}`);
     }
   } else {
-    chat.systemLine("Unknown action. Use: create, exec, stop, logs, remove, status, provider");
+    chat.infoLine("Unknown action. Use: create, exec, stop, logs, remove, status, provider");
   }
 }

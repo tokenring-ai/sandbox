@@ -1,16 +1,15 @@
 {
-  "name": "@token-ring/sandbox",
-  "version": "0.1.0",
-  "description": "Abstract sandbox interface for Token Ring",
-  "dependencies": {
-    "@token-ring/chat": "0.1.0",
-    "@token-ring/registry": "0.1.0",
-    "zod": "^4.0.17"
-  },
-  "exports": {
-    ".": "./index.ts",
-    "./*": "./*.ts"
-  },
-  "license": "MIT",
-  "type": "module"
+ "name": "@tokenring-ai/sandbox",
+ "version": "0.1.0",
+ "description": "Abstract sandbox interface for Token Ring",
+ "dependencies": {
+  "@tokenring-ai/agent": "0.1.0",
+  "zod": "^4.0.17"
+ },
+ "exports": {
+  ".": "./index.ts",
+  "./*": "./*.ts"
+ },
+ "license": "MIT",
+ "type": "module"
 }

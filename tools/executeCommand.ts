@@ -1,5 +1,4 @@
-import ChatService from "@token-ring/chat/ChatService";
-import type {Registry} from "@token-ring/registry";
+import Agent from "@tokenring-ai/agent/Agent";
 import {z} from "zod";
 import SandboxService from "../SandboxService.js";
 
@@ -13,10 +12,10 @@ export async function execute(
     containerId?: string;
     command?: string;
   },
-  registry: Registry,
+  agent: Agent,
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
-  const chat = registry.requireFirstServiceByType(ChatService);
-  const sandbox = registry.requireFirstServiceByType(SandboxService);
+  const chat = agent.requireFirstServiceByType(Agent);
+  const sandbox = agent.requireFirstServiceByType(SandboxService);
 
   if (!command) {
     throw new Error(`[${name}] command is required`);
@@ -29,11 +28,11 @@ export async function execute(
 
   chat.infoLine(`[${name}] Executing in ${targetContainer}: ${command}`);
   const result = await sandbox.executeCommand(targetContainer, command);
-  
+
   if (result.exitCode !== 0) {
     chat.errorLine(`[${name}] Command failed with exit code ${result.exitCode}`);
   }
-  
+
   return result;
 }
 

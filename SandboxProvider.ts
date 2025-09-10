@@ -22,8 +22,12 @@ export interface LogsResult {
 
 export default abstract class SandboxProvider {
   abstract createContainer(options?: SandboxOptions): Promise<SandboxResult>;
+
   abstract executeCommand(containerId: string, command: string): Promise<ExecuteResult>;
+
   abstract stopContainer(containerId: string): Promise<void>;
+
   abstract getLogs(containerId: string): Promise<LogsResult>;
+
   abstract removeContainer(containerId: string): Promise<void>;
 }
