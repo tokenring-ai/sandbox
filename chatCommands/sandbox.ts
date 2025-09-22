@@ -25,8 +25,8 @@ export function help(): Array<string> {
 }
 
 export async function execute(remainder: string, agent: Agent): Promise<void> {
-  const chat = agent.requireFirstServiceByType(Agent);
-  const sandbox = agent.requireFirstServiceByType(SandboxService);
+  const chat = agent.requireServiceByType(Agent);
+  const sandbox = agent.requireServiceByType(SandboxService);
 
   const [action, ...args] = remainder.trim().split(/\s+/);
   if (!action) {

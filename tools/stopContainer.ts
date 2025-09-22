@@ -12,8 +12,8 @@ export async function execute(
   },
   agent: Agent,
 ): Promise<{ success: boolean }> {
-  const chat = agent.requireFirstServiceByType(Agent);
-  const sandbox = agent.requireFirstServiceByType(SandboxService);
+  const chat = agent.requireServiceByType(Agent);
+  const sandbox = agent.requireServiceByType(SandboxService);
 
   const targetContainer = containerId || sandbox.getActiveContainer();
   if (!targetContainer) {

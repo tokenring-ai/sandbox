@@ -14,8 +14,8 @@ export async function execute(
   },
   agent: Agent,
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
-  const chat = agent.requireFirstServiceByType(Agent);
-  const sandbox = agent.requireFirstServiceByType(SandboxService);
+  const chat = agent.requireServiceByType(Agent);
+  const sandbox = agent.requireServiceByType(SandboxService);
 
   if (!command) {
     throw new Error(`[${name}] command is required`);

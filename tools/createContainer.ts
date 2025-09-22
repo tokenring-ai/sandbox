@@ -18,8 +18,8 @@ export async function execute(
   },
   agent: Agent,
 ): Promise<{ containerId: string; status: string }> {
-  const chat = agent.requireFirstServiceByType(Agent);
-  const sandbox = agent.requireFirstServiceByType(SandboxService);
+  const chat = agent.requireServiceByType(Agent);
+  const sandbox = agent.requireServiceByType(SandboxService);
 
   chat.infoLine(`[${name}] Creating container${image ? ` with image: ${image}` : ""}`);
   const result = await sandbox.createContainer({
