@@ -13,14 +13,14 @@ export const SandboxConfigSchema = z.object({
   }).optional()
 }).optional();
 
-export const packageInfo: TokenRingPackage = {
+export default {
   name: packageJSON.name,
   version: packageJSON.version,
   description: packageJSON.description,
   install(agentTeam: AgentTeam) {
     const config = agentTeam.getConfigSlice('sandbox', SandboxConfigSchema);
     if (config) {
-      agentTeam.addTools(packageInfo, tools);
+      agentTeam.addTools(packageJSON.name, tools);
       agentTeam.addChatCommands(chatCommands);
       const sandboxService = new SandboxService();
       agentTeam.addServices(sandboxService);
@@ -40,7 +40,7 @@ export const packageInfo: TokenRingPackage = {
       }
     }
   }
-};
+} as TokenRingPackage;
 
 export {default as SandboxService} from "./SandboxService.ts";
 export {default as SandboxResource} from "./SandboxProvider.ts";
