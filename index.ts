@@ -1,5 +1,5 @@
 import {AgentCommandService, AgentTeam, TokenRingPackage} from "@tokenring-ai/agent";
-import {AIService} from "@tokenring-ai/ai-client";
+import {ChatService} from "@tokenring-ai/chat";
 import DockerSandboxProvider from "@tokenring-ai/docker/DockerSandboxProvider";
 import {z} from "zod";
 import * as chatCommands from "./chatCommands.ts";
@@ -21,8 +21,8 @@ export default {
   install(agentTeam: AgentTeam) {
     const config = agentTeam.getConfigSlice('sandbox', SandboxConfigSchema);
     if (config) {
-      agentTeam.waitForService(AIService, aiService =>
-        aiService.addTools(packageJSON.name, tools)
+      agentTeam.waitForService(ChatService, chatService =>
+        chatService.addTools(packageJSON.name, tools)
       );
       agentTeam.waitForService(AgentCommandService, agentCommandService =>
         agentCommandService.addAgentCommands(chatCommands)

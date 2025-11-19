@@ -2,9 +2,14 @@
 
 ## Overview
 
-The `@tokenring-ai/sandbox` package provides an abstract interface for managing sandboxed environments within the Token Ring AI agent system. It enables the creation, execution, and management of isolated containers (e.g., via Docker or similar providers) to safely run commands or code. The package acts as a service layer that abstracts provider-specific details, allowing multiple sandbox providers to be registered and switched dynamically. Its primary role is to facilitate secure, isolated execution in AI agent workflows, such as running untrusted code or simulating environments.
+The `@tokenring-ai/sandbox` package provides an abstract interface for managing sandboxed environments within the Token
+Ring AI agent system. It enables the creation, execution, and management of isolated containers (e.g., via Docker or
+similar providers) to safely run commands or code. The package acts as a service layer that abstracts provider-specific
+details, allowing multiple sandbox providers to be registered and switched dynamically. Its primary role is to
+facilitate secure, isolated execution in AI agent workflows, such as running untrusted code or simulating environments.
 
 Key features include:
+
 - Abstract provider interface for extensibility (e.g., Docker, Kubernetes).
 - Service management for active providers and containers.
 - Integration with Token Ring agents via tools and chat commands.
@@ -19,10 +24,12 @@ npm install @tokenring-ai/sandbox
 ```
 
 Dependencies:
+
 - `@tokenring-ai/agent@0.1.0` (for agent integration)
 - `zod@^4.0.17` (for schema validation)
 
 To build or develop:
+
 - Ensure Node.js (with ES modules support) is installed.
 - Run `npm install` in the project root.
 - Concrete providers (e.g., Docker-based) must be implemented and registered separately, as this package is abstract.
@@ -49,30 +56,32 @@ Directories like `tools/` and `chatCommands/` contain modular, agent-specific im
 
 ### SandboxProvider (Abstract Class)
 
-The `SandboxProvider` is the foundational interface for any concrete sandbox implementation. It defines methods for container lifecycle and execution.
+The `SandboxProvider` is the foundational interface for any concrete sandbox implementation. It defines methods for
+container lifecycle and execution.
 
 **Key Methods:**
 
 - `createContainer(options?: SandboxOptions): Promise<SandboxResult>`
-  - Creates a new container.
-  - Parameters: `SandboxOptions` (image, workingDir, environment, timeout).
-  - Returns: `{ containerId: string; status: string }`.
+ - Creates a new container.
+ - Parameters: `SandboxOptions` (image, workingDir, environment, timeout).
+ - Returns: `{ containerId: string; status: string }`.
 
 - `executeCommand(containerId: string, command: string): Promise<ExecuteResult>`
-  - Runs a command in the specified container.
-  - Returns: `{ stdout: string; stderr: string; exitCode: number }`.
+ - Runs a command in the specified container.
+ - Returns: `{ stdout: string; stderr: string; exitCode: number }`.
 
 - `stopContainer(containerId: string): Promise<void>`
-  - Stops the container.
+ - Stops the container.
 
 - `getLogs(containerId: string): Promise<LogsResult>`
-  - Retrieves logs.
-  - Returns: `{ logs: string }`.
+ - Retrieves logs.
+ - Returns: `{ logs: string }`.
 
 - `removeContainer(containerId: string): Promise<void>`
-  - Removes the container.
+ - Removes the container.
 
 **Interfaces:**
+
 - `SandboxOptions`: `{ image?: string; workingDir?: string; environment?: Record<string, string>; timeout?: number; }`
 - `SandboxResult`: `{ containerId: string; status: string; }`
 - `ExecuteResult`: `{ stdout: string; stderr: string; exitCode: number; }`
@@ -82,47 +91,51 @@ Concrete implementations (e.g., DockerProvider) must extend this class.
 
 ### SandboxService
 
-The `SandboxService` manages multiple providers and tracks the active container. It implements `TokenRingService` for integration with agents.
+The `SandboxService` manages multiple providers and tracks the active container. It implements `TokenRingService` for
+integration with agents.
 
 **Key Methods:**
 
 - `registerSandboxProvider(name: string, resource: SandboxProvider): void`
-  - Registers a provider; sets as active if none exists.
+ - Registers a provider; sets as active if none exists.
 
 - `setActiveSandboxProviderName(name: string): void`
-  - Switches the active provider (throws if not found).
+ - Switches the active provider (throws if not found).
 
 - `getActiveSandboxProviderName(): string | null`
-  - Returns the current active provider.
+ - Returns the current active provider.
 
 - `getAvailableSandboxProviders(): string[]`
-  - Lists registered providers.
+ - Lists registered providers.
 
 - `setActiveContainer(containerId: string): void` / `getActiveContainer(): string | null`
-  - Manages the active container ID.
+ - Manages the active container ID.
 
 - `createContainer(options?: SandboxOptions): Promise<SandboxResult>`
-  - Delegates to active provider; sets active container.
+ - Delegates to active provider; sets active container.
 
 - `executeCommand(containerId: string, command: string): Promise<ExecuteResult>`
-  - Executes via active provider.
+ - Executes via active provider.
 
 - `stopContainer(containerId: string): Promise<void>`
-  - Stops and clears active if matching.
+ - Stops and clears active if matching.
 
 - `getLogs(containerId: string): Promise<LogsResult>`
-  - Retrieves logs via active provider.
+ - Retrieves logs via active provider.
 
 - `removeContainer(containerId: string): Promise<void>`
-  - Removes and clears active if matching.
+ - Removes and clears active if matching.
 
-Interactions: The service routes all operations to the active provider. Providers are registered at runtime, enabling pluggable backends. Active container is auto-set on creation for convenience.
+Interactions: The service routes all operations to the active provider. Providers are registered at runtime, enabling
+pluggable backends. Active container is auto-set on creation for convenience.
 
 ### Tools
 
-Tools are agent-executable functions that wrap service methods, providing logging and validation via Zod schemas. Exported from `tools.ts`.
+Tools are agent-executable functions that wrap service methods, providing logging and validation via Zod schemas.
+Exported from `tools.ts`.
 
 Examples:
+
 - `sandbox/createContainer`: Creates a container with optional params.
 - `sandbox/executeCommand`: Runs a command (uses active container if unspecified).
 - `sandbox/stopContainer`, `sandbox/getLogs`, `sandbox/removeContainer`: Manage containers with optional ID.
@@ -134,6 +147,7 @@ Each tool logs actions via the agent's chat service and handles errors (e.g., no
 The `/sandbox` command provides interactive control in agent chats.
 
 **Actions:**
+
 - `create [image]`: Create container.
 - `exec <command>`: Execute in active container.
 - `stop [containerId]`: Stop container.
@@ -202,6 +216,7 @@ In a chat session:
 ## API Reference
 
 ### SandboxService
+
 - `registerSandboxProvider(name: string, resource: SandboxProvider): void`
 - `setActiveSandboxProviderName(name: string): void`
 - `getActiveSandboxProviderName(): string | null`
@@ -215,6 +230,7 @@ In a chat session:
 - `setActiveContainer(containerId: string): void`
 
 ### SandboxProvider (Abstract)
+
 - `createContainer(options?: SandboxOptions): Promise<SandboxResult>`
 - `executeCommand(containerId: string, command: string): Promise<ExecuteResult>`
 - `stopContainer(containerId: string): Promise<void>`
@@ -222,9 +238,11 @@ In a chat session:
 - `removeContainer(containerId: string): Promise<void`
 
 ### Tools (e.g., sandbox/createContainer)
+
 - `execute(params: { image?: string; ... }, agent: Agent): Promise<Result>`
 
 ### Chat Command: /sandbox
+
 - `execute(remainder: string, agent: Agent): Promise<void>`
 
 ## Dependencies
@@ -234,9 +252,11 @@ In a chat session:
 
 ## Contributing/Notes
 
-- **Testing**: Unit tests for service/tools should mock providers. Integration tests require concrete implementations (e.g., Docker).
+- **Testing**: Unit tests for service/tools should mock providers. Integration tests require concrete implementations (
+  e.g., Docker).
 - **Building**: Use `npm run build` if configured; package uses ES modules (`type: module`).
-- **Limitations**: Abstract only—no built-in providers. Error handling focuses on missing resources; add timeouts/retries in implementations. Binary execution assumes text output; logs are strings.
+- **Limitations**: Abstract only—no built-in providers. Error handling focuses on missing resources; add
+  timeouts/retries in implementations. Binary execution assumes text output; logs are strings.
 - **Extending**: Implement `SandboxProvider` for new backends (e.g., AWS Firecracker). Register via `SandboxService`.
 - License: MIT (see LICENSE).
 
