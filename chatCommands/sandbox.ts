@@ -1,7 +1,8 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import SandboxService from "../SandboxService.js";
 
-export const description = "/sandbox [action] - Sandbox container operations";
+const description = "/sandbox [action] - Sandbox container operations";
 
 export function help(): Array<string> {
   return [
@@ -24,7 +25,7 @@ export function help(): Array<string> {
   ];
 }
 
-export async function execute(remainder: string, agent: Agent): Promise<void> {
+async function execute(remainder: string, agent: Agent): Promise<void> {
   const chat = agent.requireServiceByType(Agent);
   const sandbox = agent.requireServiceByType(SandboxService);
 
@@ -96,3 +97,8 @@ export async function execute(remainder: string, agent: Agent): Promise<void> {
     chat.infoLine("Unknown action. Use: create, exec, stop, logs, remove, status, provider");
   }
 }
+export default {
+  description,
+  execute,
+  help,
+} as TokenRingAgentCommand

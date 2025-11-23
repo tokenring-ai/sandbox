@@ -1,17 +1,15 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
 import {z} from "zod";
 import SandboxService from "../SandboxService.js";
 
-export const name = "sandbox/executeCommand";
+const name = "sandbox/executeCommand";
 
-export async function execute(
+async function execute(
   {
     containerId,
     command
-  }: {
-    containerId?: string;
-    command?: string;
-  },
+  }: z.infer<typeof inputSchema>,
   agent: Agent,
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
   const chat = agent.requireServiceByType(Agent);
@@ -36,9 +34,13 @@ export async function execute(
   return result;
 }
 
-export const description = "Execute a command in a sandbox container";
+const description = "Execute a command in a sandbox container";
 
-export const inputSchema = z.object({
+const inputSchema = z.object({
   containerId: z.string().optional().describe("Container ID (uses active container if not specified)"),
   command: z.string().min(1).describe("Command to execute"),
 });
+
+export default {
+  name, description, inputSchema, execute,
+} as TokenRingToolDefinition<typeof inputSchema>;

@@ -1,21 +1,17 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
 import {z} from "zod";
 import SandboxService from "../SandboxService.js";
 
-export const name = "sandbox/createContainer";
+const name = "sandbox/createContainer";
 
-export async function execute(
+async function execute(
   {
     image,
     workingDir,
     environment,
     timeout
-  }: {
-    image?: string;
-    workingDir?: string;
-    environment?: Record<string, string>;
-    timeout?: number;
-  },
+  }: z.infer<typeof inputSchema>,
   agent: Agent,
 ): Promise<{ containerId: string; status: string }> {
   const chat = agent.requireServiceByType(Agent);
@@ -33,11 +29,15 @@ export async function execute(
   return result;
 }
 
-export const description = "Create a new sandbox container using the active sandbox provider";
+const description = "Create a new sandbox container using the active sandbox provider";
 
-export const inputSchema = z.object({
+const inputSchema = z.object({
   image: z.string().optional().describe("Container image to use"),
   workingDir: z.string().optional().describe("Working directory in container"),
   environment: z.record(z.string(), z.string()).optional().describe("Environment variables"),
   timeout: z.number().optional().describe("Timeout in seconds"),
 });
+
+export default {
+  name, description, inputSchema, execute,
+} as TokenRingToolDefinition<typeof inputSchema>;

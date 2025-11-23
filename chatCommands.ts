@@ -1,1 +1,1 @@
-export * as sandbox from "./chatCommands/sandbox.ts";
+export {default as sandbox} from "./chatCommands/sandbox.ts";
