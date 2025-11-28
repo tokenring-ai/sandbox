@@ -4,10 +4,10 @@ import {ChatService} from "@tokenring-ai/chat";
 import DockerSandboxProvider from "@tokenring-ai/docker/DockerSandboxProvider";
 import {TokenRingPlugin} from "@tokenring-ai/app";
 import {z} from "zod";
-import * as chatCommands from "./chatCommands.ts";
+import chatCommands from "./chatCommands.ts";
 import packageJSON from './package.json' with {type: 'json'};
 import SandboxService from "./SandboxService.ts";
-import * as tools from "./tools.ts";
+import tools from "./tools.ts";
 
 export const SandboxConfigSchema = z.object({
   providers: z.record(z.string(), z.any()),

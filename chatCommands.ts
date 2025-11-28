@@ -1,1 +1,5 @@
-export {default as sandbox} from "./commands/sandbox.ts";
+import {default as sandbox} from "./commands/sandbox.ts";
+
+export default {
+  sandbox,
+};

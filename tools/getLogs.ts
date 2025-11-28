@@ -20,9 +20,7 @@ async function execute(
   }
 
   chat.infoLine(`[${name}] Getting logs for container: ${targetContainer}`);
-  const result = await sandbox.getLogs(targetContainer);
-
-  return result;
+  return await sandbox.getLogs(targetContainer);
 }
 
 const description = "Get logs from a sandbox container";

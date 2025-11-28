@@ -2,28 +2,101 @@ import Agent from "@tokenring-ai/agent/Agent";
 import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import SandboxService from "../SandboxService.js";
 
-const description = "/sandbox [action] - Sandbox container operations";
+const description = "/sandbox - Sandbox container operations";
 
-export function help(): Array<string> {
-  return [
-    "/sandbox [action] - Sandbox container operations",
-    "  Actions:",
-    "    create [image]     - Create new container",
-    "    exec <command>     - Execute command in active container",
-    "    stop [containerId] - Stop container",
-    "    logs [containerId] - Get container logs",
-    "    remove [containerId] - Remove container",
-    "    status             - Show active container and provider",
-    "    provider [name]    - Show/set active provider",
-    "",
-    "  Examples:",
-    "    /sandbox create ubuntu:latest",
-    "    /sandbox exec ls -la",
-    "    /sandbox logs",
-    "    /sandbox stop",
-    "    /sandbox provider docker",
-  ];
-}
+const help: string = `# 📦 /sandbox [action] - Sandbox Container Operations
+
+Manage and interact with sandbox containers for development and testing.
+
+## Available Actions
+
+### create [image]
+
+Create a new sandbox container
+- **[image]** - Container image (required, e.g., 'ubuntu:latest')
+
+**Example:**
+/sandbox create ubuntu:22.04
+
+### exec <command>
+
+Execute command in active container
+- **<command>** - Command to execute (required)
+- **Requires**: Active container must exist
+
+**Example:**
+/sandbox exec ls -la /app
+
+### stop [containerId]
+
+Stop a running container
+- **[containerId]** - Container ID (optional, uses active if not specified)
+
+**Examples:**
+/sandbox stop
+/sandbox stop abc123def456
+
+### logs [containerId]
+
+Retrieve container logs
+- **[containerId]** - Container ID (optional, uses active if not specified)
+
+**Examples:**
+/sandbox logs
+/sandbox logs abc123def456
+
+### remove [containerId]
+
+Remove a container
+- **[containerId]** - Container ID (optional, uses active if not specified)
+
+**Examples:**
+/sandbox remove
+/sandbox remove abc123def456
+
+### status
+
+Show current sandbox status
+- Displays active container and provider information
+
+**Example:**
+/sandbox status
+
+### provider [name]
+
+Manage sandbox provider
+- **[name]** - Provider name (optional, shows current if not specified)
+- Shows available providers when called without arguments
+
+**Examples:**
+/sandbox provider
+/sandbox provider docker
+
+## Common Usage Patterns
+
+# Create and start a new Ubuntu container
+/sandbox create ubuntu:latest
+
+# List files in the active container
+/sandbox exec ls -la
+
+# Stop the active container
+/sandbox stop
+
+# View container logs
+/sandbox logs
+
+# Check current status
+/sandbox status
+
+# Switch to Docker provider
+/sandbox provider docker
+
+## Notes
+
+- Actions with optional [containerId] will use the active container if none is specified
+- The 'exec' action requires an active container to be created first
+- Container IDs can be obtained from the status command or logs`;
 
 async function execute(remainder: string, agent: Agent): Promise<void> {
   const chat = agent.requireServiceByType(Agent);
@@ -31,7 +104,7 @@ async function execute(remainder: string, agent: Agent): Promise<void> {
 
   const [action, ...args] = remainder.trim().split(/\s+/);
   if (!action) {
-    help().forEach((l) => chat.infoLine(l));
+    agent.chatOutput(help);
     return;
   }
 
