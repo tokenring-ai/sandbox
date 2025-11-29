@@ -1,8 +1,7 @@
-import TokenRingApp from "@tokenring-ai/app"; 
 import {AgentCommandService} from "@tokenring-ai/agent";
+import TokenRingApp, {TokenRingPlugin} from "@tokenring-ai/app";
 import {ChatService} from "@tokenring-ai/chat";
-import DockerSandboxProvider from "@tokenring-ai/docker/DockerSandboxProvider";
-import {TokenRingPlugin} from "@tokenring-ai/app";
+import {DockerSandboxProvider} from "@tokenring-ai/docker";
 import {z} from "zod";
 import chatCommands from "./chatCommands.ts";
 import packageJSON from './package.json' with {type: 'json'};
