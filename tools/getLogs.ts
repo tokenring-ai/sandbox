@@ -7,26 +7,25 @@ const name = "sandbox/getLogs";
 
 async function execute(
   {
-    containerId
+    label
   }: z.infer<typeof inputSchema>,
   agent: Agent,
 ): Promise<{ logs: string }> {
-  const chat = agent.requireServiceByType(Agent);
   const sandbox = agent.requireServiceByType(SandboxService);
 
-  const targetContainer = containerId || sandbox.getActiveContainer();
-  if (!targetContainer) {
+  const targetLabel = label || sandbox.getActiveContainer();
+  if (!targetLabel) {
     throw new Error(`[${name}] No container specified and no active container`);
   }
 
-  chat.infoLine(`[${name}] Getting logs for container: ${targetContainer}`);
-  return await sandbox.getLogs(targetContainer);
+  agent.infoLine(`[${name}] Getting logs for container: '${targetLabel}'`);
+  return await sandbox.getLogs(targetLabel);
 }
 
 const description = "Get logs from a sandbox container";
 
 const inputSchema = z.object({
-  containerId: z.string().optional().describe("Container ID (uses active container if not specified)"),
+  label: z.string().optional().describe("Container label (uses active container if not specified)"),
 });
 
 export default {

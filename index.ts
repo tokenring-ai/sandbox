@@ -28,6 +28,7 @@ export default {
       app.waitForService(AgentCommandService, agentCommandService =>
         agentCommandService.addAgentCommands(chatCommands)
       );
+
       const sandboxService = new SandboxService();
       app.addServices(sandboxService);
 
@@ -38,6 +39,8 @@ export default {
             case "docker":
               sandboxService.registerSandboxProvider(name, new DockerSandboxProvider(sandboxConfig));
               break;
+            default:
+              throw new Error(`Unknown sandbox provider type: ${sandboxConfig.type}`);
           }
         }
       }

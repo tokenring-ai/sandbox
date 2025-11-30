@@ -1,4 +1,5 @@
 export interface SandboxOptions {
+  label?: string;
   image?: string;
   workingDir?: string;
   environment?: Record<string, string>;

@@ -9,13 +9,14 @@ import SandboxProvider, {
 } from "./SandboxProvider.js";
 
 export default class SandboxService implements TokenRingService {
-  name = "Sandbox";
+  name = "SandboxService";
   description = "Abstract interface for sandbox operations";
   protected agent!: Agent;
 
   private sandboxProviders: Record<string, SandboxProvider> = {};
   private activeSandboxProvider: string | null = null;
   private activeContainer: string | null = null;
+  private labelToContainerId: Map<string, string> = new Map();
 
   registerSandboxProvider(name: string, resource: SandboxProvider) {
     this.sandboxProviders[name] = resource;
@@ -49,28 +50,35 @@ export default class SandboxService implements TokenRingService {
 
   async createContainer(options?: SandboxOptions): Promise<SandboxResult> {
     const result = await this.getActiveSandboxProvider().createContainer(options);
-    this.activeContainer = result.containerId;
-    return result;
+    const label = options?.label || result.containerId;
+    this.labelToContainerId.set(label, result.containerId);
+    this.activeContainer = label;
+    return { containerId: label, status: result.status };
   }
 
-  async executeCommand(containerId: string, command: string): Promise<ExecuteResult> {
+  async executeCommand(label: string, command: string): Promise<ExecuteResult> {
+    const containerId = this.labelToContainerId.get(label) || label;
     return this.getActiveSandboxProvider().executeCommand(containerId, command);
   }
 
-  async stopContainer(containerId: string): Promise<void> {
+  async stopContainer(label: string): Promise<void> {
+    const containerId = this.labelToContainerId.get(label) || label;
     await this.getActiveSandboxProvider().stopContainer(containerId);
-    if (this.activeContainer === containerId) {
+    if (this.activeContainer === label) {
       this.activeContainer = null;
     }
   }
 
-  async getLogs(containerId: string): Promise<LogsResult> {
+  async getLogs(label: string): Promise<LogsResult> {
+    const containerId = this.labelToContainerId.get(label) || label;
     return this.getActiveSandboxProvider().getLogs(containerId);
   }
 
-  async removeContainer(containerId: string): Promise<void> {
+  async removeContainer(label: string): Promise<void> {
+    const containerId = this.labelToContainerId.get(label) || label;
     await this.getActiveSandboxProvider().removeContainer(containerId);
-    if (this.activeContainer === containerId) {
+    this.labelToContainerId.delete(label);
+    if (this.activeContainer === label) {
       this.activeContainer = null;
     }
   }

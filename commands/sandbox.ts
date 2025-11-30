@@ -10,13 +10,14 @@ Manage and interact with sandbox containers for development and testing.
 
 ## Available Actions
 
-### create [image]
+### create <label> [image]
 
 Create a new sandbox container
-- **[image]** - Container image (required, e.g., 'ubuntu:latest')
+- **<label>** - Container label (required)
+- **[image]** - Container image (optional, e.g., 'ubuntu:latest')
 
 **Example:**
-/sandbox create ubuntu:22.04
+/sandbox create myapp ubuntu:22.04
 
 ### exec <command>
 
@@ -27,32 +28,32 @@ Execute command in active container
 **Example:**
 /sandbox exec ls -la /app
 
-### stop [containerId]
+### stop [label]
 
 Stop a running container
-- **[containerId]** - Container ID (optional, uses active if not specified)
+- **[label]** - Container label (optional, uses active if not specified)
 
 **Examples:**
 /sandbox stop
-/sandbox stop abc123def456
+/sandbox stop myapp
 
-### logs [containerId]
+### logs [label]
 
 Retrieve container logs
-- **[containerId]** - Container ID (optional, uses active if not specified)
+- **[label]** - Container label (optional, uses active if not specified)
 
 **Examples:**
 /sandbox logs
-/sandbox logs abc123def456
+/sandbox logs myapp
 
-### remove [containerId]
+### remove [label]
 
 Remove a container
-- **[containerId]** - Container ID (optional, uses active if not specified)
+- **[label]** - Container label (optional, uses active if not specified)
 
 **Examples:**
 /sandbox remove
-/sandbox remove abc123def456
+/sandbox remove myapp
 
 ### status
 
@@ -75,7 +76,7 @@ Manage sandbox provider
 ## Common Usage Patterns
 
 # Create and start a new Ubuntu container
-/sandbox create ubuntu:latest
+/sandbox create myapp ubuntu:latest
 
 # List files in the active container
 /sandbox exec ls -la
@@ -94,9 +95,9 @@ Manage sandbox provider
 
 ## Notes
 
-- Actions with optional [containerId] will use the active container if none is specified
+- Actions with optional [label] will use the active container if none is specified
 - The 'exec' action requires an active container to be created first
-- Container IDs can be obtained from the status command or logs`;
+- Container labels are used to reference containers instead of IDs`;
 
 async function execute(remainder: string, agent: Agent): Promise<void> {
   const chat = agent.requireServiceByType(Agent);
@@ -109,8 +110,12 @@ async function execute(remainder: string, agent: Agent): Promise<void> {
   }
 
   if (action === "create") {
-    const image = args[0];
-    const result = await sandbox.createContainer({image});
+    const [label, image] = args;
+    if (!label) {
+      chat.errorLine("Usage: /sandbox create <label> [image]");
+      return;
+    }
+    const result = await sandbox.createContainer({label, image});
     chat.infoLine(`Container created: ${result.containerId} (${result.status})`);
   } else if (action === "exec") {
     const command = args.join(" ");
@@ -128,29 +133,29 @@ async function execute(remainder: string, agent: Agent): Promise<void> {
     if (result.stderr) chat.errorLine(`stderr: ${result.stderr}`);
     chat.infoLine(`Exit code: ${result.exitCode}`);
   } else if (action === "stop") {
-    const containerId = args[0] || sandbox.getActiveContainer();
-    if (!containerId) {
+    const label = args[0] || sandbox.getActiveContainer();
+    if (!label) {
       chat.errorLine("No container specified and no active container");
       return;
     }
-    await sandbox.stopContainer(containerId);
-    chat.infoLine(`Container stopped: ${containerId}`);
+    await sandbox.stopContainer(label);
+    chat.infoLine(`Container stopped: ${label}`);
   } else if (action === "logs") {
-    const containerId = args[0] || sandbox.getActiveContainer();
-    if (!containerId) {
+    const label = args[0] || sandbox.getActiveContainer();
+    if (!label) {
       chat.errorLine("No container specified and no active container");
       return;
     }
-    const result = await sandbox.getLogs(containerId);
+    const result = await sandbox.getLogs(label);
     chat.infoLine(`Logs:\n${result.logs}`);
   } else if (action === "remove") {
-    const containerId = args[0] || sandbox.getActiveContainer();
-    if (!containerId) {
+    const label = args[0] || sandbox.getActiveContainer();
+    if (!label) {
       chat.errorLine("No container specified and no active container");
       return;
     }
-    await sandbox.removeContainer(containerId);
-    chat.infoLine(`Container removed: ${containerId}`);
+    await sandbox.removeContainer(label);
+    chat.infoLine(`Container removed: ${label}`);
   } else if (action === "status") {
     const activeContainer = sandbox.getActiveContainer();
     const activeProvider = sandbox.getActiveSandboxProviderName();

@@ -7,20 +7,19 @@ const name = "sandbox/removeContainer";
 
 async function execute(
   {
-    containerId
+    label
   }: z.infer<typeof inputSchema>,
   agent: Agent,
 ): Promise<{ success: boolean }> {
-  const chat = agent.requireServiceByType(Agent);
   const sandbox = agent.requireServiceByType(SandboxService);
 
-  const targetContainer = containerId || sandbox.getActiveContainer();
-  if (!targetContainer) {
+  const targetLabel = label || sandbox.getActiveContainer();
+  if (!targetLabel) {
     throw new Error(`[${name}] No container specified and no active container`);
   }
 
-  chat.infoLine(`[${name}] Removing container: ${targetContainer}`);
-  await sandbox.removeContainer(targetContainer);
+  agent.infoLine(`[${name}] Removing container: '${targetLabel}'`);
+  await sandbox.removeContainer(targetLabel);
 
   return {success: true};
 }
@@ -28,7 +27,7 @@ async function execute(
 const description = "Remove a sandbox container";
 
 const inputSchema = z.object({
-  containerId: z.string().optional().describe("Container ID (uses active container if not specified)"),
+  label: z.string().optional().describe("Container label (uses active container if not specified)"),
 });
 
 export default {
