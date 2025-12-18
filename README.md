@@ -283,7 +283,7 @@ abstract class SandboxProvider {
 
 ```typescript
 // Main exports
-export default sandboxPlugin as TokenRingPlugin
+export default sandboxPlugin satisfies TokenRingPlugin
 export { SandboxService }
 export { SandboxResource as SandboxProvider }
 
