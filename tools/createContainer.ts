@@ -3,7 +3,7 @@ import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
 import {z} from "zod";
 import SandboxService from "../SandboxService.js";
 
-const name = "sandbox/createContainer";
+const name = "sandbox_createContainer";
 
 async function execute(
   {
