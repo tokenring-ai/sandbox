@@ -6,28 +6,23 @@ The `@tokenring-ai/sandbox` package provides an abstract interface for managing 
 
 Key features include:
 - Abstract provider interface for extensibility (e.g., Docker, Kubernetes)
-- Service management for active providers and containers
+- Service management for active providers and containers with label mapping
 - Integration with Token Ring agents via tools and chat commands
 - Error handling for missing providers/containers and command failures
 
 ## Installation
 
 ```bash
-npm install @tokenring-ai/sandbox
+bun install @tokenring-ai/sandbox
 ```
 
 ### Dependencies
 
-- `@tokenring-ai/agent@0.1.0` - For agent integration and service management
+- `@tokenring-ai/agent@0.2.0` - For agent integration and service management
+- `@tokenring-ai/app@0.2.0` - For service management and plugin architecture
+- `@tokenring-ai/chat@0.2.0` - For chat command integration
+- `@tokenring-ai/docker@0.2.0` - Docker provider implementation
 - `zod@^4.1.12` - For schema validation in tools
-
-### Setup
-
-This package is designed for use within the Token Ring AI ecosystem. To set up:
-
-1. Install the package as shown above
-2. Ensure you have a concrete sandbox provider implementation (e.g., Docker provider)
-3. Register the provider with the SandboxService
 
 ## Package Structure
 
@@ -60,7 +55,7 @@ The `SandboxProvider` is the foundational interface for any concrete sandbox imp
 
 - `createContainer(options?: SandboxOptions): Promise<SandboxResult>`
   - Creates a new container
-  - Parameters: `SandboxOptions` (image, workingDir, environment, timeout)
+  - Parameters: `SandboxOptions` (label, image, workingDir, environment, timeout)
   - Returns: `{ containerId: string; status: string }`
 
 - `executeCommand(containerId: string, command: string): Promise<ExecuteResult>`
@@ -81,6 +76,7 @@ The `SandboxProvider` is the foundational interface for any concrete sandbox imp
 
 ```typescript
 interface SandboxOptions {
+  label?: string;
   image?: string;
   workingDir?: string;
   environment?: Record<string, string>;
@@ -105,7 +101,7 @@ interface LogsResult {
 
 ### SandboxService
 
-The `SandboxService` manages multiple providers and tracks the active container. It implements `TokenRingService` for integration with agents.
+The `SandboxService` manages multiple providers and tracks the active container with label mapping. It implements `TokenRingService` for integration with agents.
 
 **Key Methods:**
 
@@ -122,21 +118,21 @@ The `SandboxService` manages multiple providers and tracks the active container.
   - Lists registered providers
 
 - `setActiveContainer(containerId: string): void` / `getActiveContainer(): string | null`
-  - Manages the active container ID
+  - Manages the active container ID with label support
 
 - `createContainer(options?: SandboxOptions): Promise<SandboxResult>`
-  - Delegates to active provider; sets active container
+  - Delegates to active provider; sets active container with label mapping
 
-- `executeCommand(containerId: string, command: string): Promise<ExecuteResult>`
-  - Executes via active provider
+- `executeCommand(label: string, command: string): Promise<ExecuteResult>`
+  - Executes via active provider using label-to-container mapping
 
-- `stopContainer(containerId: string): Promise<void>`
+- `stopContainer(label: string): Promise<void>`
   - Stops and clears active if matching
 
-- `getLogs(containerId: string): Promise<LogsResult>`
-  - Retrieves logs via active provider
+- `getLogs(label: string): Promise<LogsResult>`
+  - Retrieves logs via active provider using label-to-container mapping
 
-- `removeContainer(containerId: string): Promise<void>`
+- `removeContainer(label: string): Promise<void>`
   - Removes and clears active if matching
 
 ### Tools
@@ -151,7 +147,7 @@ Tools are agent-executable functions that wrap service methods, providing loggin
 - `sandbox/getLogs`: Gets container logs (uses active container if unspecified)
 - `sandbox/removeContainer`: Removes a container (uses active container if unspecified)
 
-Each tool logs actions via the agent's chat service and handles errors (e.g., no active container).
+Each tool logs actions via the agent's chat service and handles errors (e.g., no active container, provider not found).
 
 ### Chat Commands
 
@@ -258,10 +254,10 @@ class SandboxService implements TokenRingService {
   getActiveSandboxProviderName(): string | null
   getAvailableSandboxProviders(): string[]
   createContainer(options?: SandboxOptions): Promise<SandboxResult>
-  executeCommand(containerId: string, command: string): Promise<ExecuteResult>
-  stopContainer(containerId: string): Promise<void>
-  getLogs(containerId: string): Promise<LogsResult>
-  removeContainer(containerId: string): Promise<void>
+  executeCommand(label: string, command: string): Promise<ExecuteResult>
+  stopContainer(label: string): Promise<void>
+  getLogs(label: string): Promise<LogsResult>
+  removeContainer(label: string): Promise<void>
   getActiveContainer(): string | null
   setActiveContainer(containerId: string): void
 }
@@ -285,7 +281,6 @@ abstract class SandboxProvider {
 // Main exports
 export default sandboxPlugin satisfies TokenRingPlugin
 export { SandboxService }
-export { SandboxResource as SandboxProvider }
 
 // Configuration schema
 export const SandboxConfigSchema: z.ZodType
@@ -300,6 +295,7 @@ export * from './chatCommands'
 ## Configuration Options
 
 ### SandboxOptions
+- `label?`: Container label for easier reference
 - `image?`: Container image to use (e.g., 'ubuntu:latest')
 - `workingDir?`: Working directory in container
 - `environment?`: Environment variables as key-value pairs
@@ -310,7 +306,10 @@ Providers are configured through the app's sandbox configuration. The package cu
 
 ## Dependencies
 
-- `@tokenring-ai/agent@0.1.0` - For agent integration and service management
+- `@tokenring-ai/agent@0.2.0` - For agent integration and service management
+- `@tokenring-ai/app@0.2.0` - For service management and plugin architecture
+- `@tokenring-ai/chat@0.2.0` - For chat command integration
+- `@tokenring-ai/docker@0.2.0` - Docker provider implementation
 - `zod@^4.1.12` - For schema validation in tools
 
 ## Development
@@ -318,12 +317,16 @@ Providers are configured through the app's sandbox configuration. The package cu
 ### Building
 
 ```bash
-npm run build
+bun run build
 ```
 
 ### Testing
 
 Unit tests for the service and tools should mock providers. Integration tests require concrete implementations (e.g., Docker).
+
+```bash
+bun run test
+```
 
 ### Extending
 
