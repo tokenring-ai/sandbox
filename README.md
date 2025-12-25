@@ -155,7 +155,7 @@ The `/sandbox` command provides interactive control in agent chats.
 
 **Actions:**
 
-- `create [image]`: Create a new container
+- `create [label] [image]`: Create a new container
 - `exec <command>`: Execute command in active container
 - `stop [containerId]`: Stop container
 - `logs [containerId]`: Get container logs
