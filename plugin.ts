@@ -1,21 +1,26 @@
 import {AgentCommandService} from "@tokenring-ai/agent";
-import TokenRingApp, {TokenRingPlugin} from "@tokenring-ai/app";
+import {TokenRingPlugin} from "@tokenring-ai/app";
 import {ChatService} from "@tokenring-ai/chat";
 import {DockerSandboxProvider} from "@tokenring-ai/docker";
+import {z} from "zod";
 import chatCommands from "./chatCommands.ts";
 import {SandboxConfigSchema} from "./index.ts";
 import packageJSON from './package.json' with {type: 'json'};
 import SandboxService from "./SandboxService.ts";
 import tools from "./tools.ts";
 
+const packageConfigSchema = z.object({
+  sandbox: SandboxConfigSchema,
+});
+
 
 export default {
   name: packageJSON.name,
   version: packageJSON.version,
   description: packageJSON.description,
-  install(app: TokenRingApp) {
-    const config = app.getConfigSlice('sandbox', SandboxConfigSchema);
-    if (config) {
+  install(app, config) {
+    // const config = app.getConfigSlice('sandbox', SandboxConfigSchema);
+    if (config.sandbox) {
       app.waitForService(ChatService, chatService =>
         chatService.addTools(packageJSON.name, tools)
       );
@@ -26,9 +31,9 @@ export default {
       const sandboxService = new SandboxService();
       app.addServices(sandboxService);
 
-      if (config.providers) {
-        for (const name in config.providers) {
-          const sandboxConfig = config.providers[name];
+      if (config.sandbox.providers) {
+        for (const name in config.sandbox.providers) {
+          const sandboxConfig = config.sandbox.providers[name];
           switch (sandboxConfig.type) {
             case "docker":
               sandboxService.registerSandboxProvider(name, new DockerSandboxProvider(sandboxConfig));
@@ -38,9 +43,10 @@ export default {
           }
         }
       }
-      if (config.default?.provider) {
-        sandboxService.setActiveSandboxProviderName(config.default.provider);
+      if (config.sandbox.default?.provider) {
+        sandboxService.setActiveSandboxProviderName(config.sandbox.default.provider);
       }
     }
-  }
-} satisfies TokenRingPlugin;
+  },
+  config: packageConfigSchema
+} satisfies TokenRingPlugin<typeof packageConfigSchema>;
