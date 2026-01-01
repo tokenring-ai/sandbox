@@ -24,7 +24,7 @@ async function execute(
     workingDir,
     environment,
     timeout
-  });
+  }, agent);
 
   agent.infoLine(`[${name}] Container created: ${result.containerId}`);
   return result;

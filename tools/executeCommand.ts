@@ -18,13 +18,13 @@ async function execute(
     throw new Error(`[${name}] command is required`);
   }
 
-  const targetLabel = label || sandbox.getActiveContainer();
+  const targetLabel = label || sandbox.getActiveContainer(agent);
   if (!targetLabel) {
     throw new Error(`[${name}] No container specified and no active container`);
   }
 
   agent.infoLine(`[${name}] Executing in '${targetLabel}': ${command}`);
-  const result = await sandbox.executeCommand(targetLabel, command);
+  const result = await sandbox.executeCommand(targetLabel, command, agent);
 
   if (result.exitCode !== 0) {
     agent.errorLine(`[${name}] Command failed with exit code ${result.exitCode}`);

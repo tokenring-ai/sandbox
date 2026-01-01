@@ -13,13 +13,13 @@ async function execute(
 ): Promise<{ logs: string }> {
   const sandbox = agent.requireServiceByType(SandboxService);
 
-  const targetLabel = label || sandbox.getActiveContainer();
+  const targetLabel = label || sandbox.getActiveContainer(agent);
   if (!targetLabel) {
     throw new Error(`[${name}] No container specified and no active container`);
   }
 
   agent.infoLine(`[${name}] Getting logs for container: '${targetLabel}'`);
-  return await sandbox.getLogs(targetLabel);
+  return await sandbox.getLogs(targetLabel, agent);
 }
 
 const description = "Get logs from a sandbox container";

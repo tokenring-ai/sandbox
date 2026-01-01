@@ -21,14 +21,14 @@ export interface LogsResult {
   logs: string;
 }
 
-export default abstract class SandboxProvider {
-  abstract createContainer(options?: SandboxOptions): Promise<SandboxResult>;
+export interface SandboxProvider {
+  createContainer(options?: SandboxOptions): Promise<SandboxResult>;
 
-  abstract executeCommand(containerId: string, command: string): Promise<ExecuteResult>;
+  executeCommand(containerId: string, command: string): Promise<ExecuteResult>;
 
-  abstract stopContainer(containerId: string): Promise<void>;
+  stopContainer(containerId: string): Promise<void>;
 
-  abstract getLogs(containerId: string): Promise<LogsResult>;
+  getLogs(containerId: string): Promise<LogsResult>;
 
-  abstract removeContainer(containerId: string): Promise<void>;
+  removeContainer(containerId: string): Promise<void>;
 }

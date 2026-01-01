@@ -4,13 +4,13 @@ import {ChatService} from "@tokenring-ai/chat";
 import {DockerSandboxProvider} from "@tokenring-ai/docker";
 import {z} from "zod";
 import chatCommands from "./chatCommands.ts";
-import {SandboxConfigSchema} from "./index.ts";
 import packageJSON from './package.json' with {type: 'json'};
 import SandboxService from "./SandboxService.ts";
+import {SandboxServiceConfigSchema} from "./schema.ts";
 import tools from "./tools.ts";
 
 const packageConfigSchema = z.object({
-  sandbox: SandboxConfigSchema,
+  sandbox: SandboxServiceConfigSchema
 });
 
 
@@ -27,7 +27,7 @@ export default {
         agentCommandService.addAgentCommands(chatCommands)
       );
 
-      const sandboxService = new SandboxService();
+      const sandboxService = new SandboxService(config.sandbox);
       app.addServices(sandboxService);
 
       if (config.sandbox.providers) {
@@ -35,15 +35,12 @@ export default {
           const sandboxConfig = config.sandbox.providers[name];
           switch (sandboxConfig.type) {
             case "docker":
-              sandboxService.registerSandboxProvider(name, new DockerSandboxProvider(sandboxConfig));
+              sandboxService.registerProvider(name, new DockerSandboxProvider(sandboxConfig));
               break;
             default:
               throw new Error(`Unknown sandbox provider type: ${sandboxConfig.type}`);
           }
         }
-      }
-      if (config.sandbox.default?.provider) {
-        sandboxService.setActiveSandboxProviderName(config.sandbox.default.provider);
       }
     }
   },
