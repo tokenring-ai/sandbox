@@ -24,7 +24,7 @@ export default class SandboxService implements TokenRingService {
 
   constructor(readonly options: z.output<typeof SandboxServiceConfigSchema>) {}
 
-  async attach(agent: Agent): Promise<void> {
+  attach(agent: Agent): void {
     const config = deepMerge(this.options.agentDefaults, agent.getAgentConfigSlice('sandbox', SandboxAgentConfigSchema));
     agent.initializeState(SandboxState, config);
   }
