@@ -6,6 +6,6 @@ export async function status(_remainder: string, agent: Agent): Promise<void> {
   const sandbox = agent.requireServiceByType(SandboxService);
   const state = agent.getState(SandboxState);
   
-  agent.infoLine(`Active container: ${state.activeContainer || "none"}`);
-  agent.infoLine(`Active provider: ${state.provider || "none"}`);
+  agent.infoMessage(`Active container: ${state.activeContainer || "none"}`);
+  agent.infoMessage(`Active provider: ${state.provider || "none"}`);
 }

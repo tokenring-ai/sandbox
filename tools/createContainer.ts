@@ -17,7 +17,7 @@ async function execute(
 ): Promise<{ containerId: string; status: string }> {
   const sandbox = agent.requireServiceByType(SandboxService);
 
-  agent.infoLine(`[${name}] Creating container '${label}'${image ? ` with image: ${image}` : ""}`);
+  agent.infoMessage(`[${name}] Creating container '${label}'${image ? ` with image: ${image}` : ""}`);
   const result = await sandbox.createContainer({
     label,
     image,
@@ -26,7 +26,7 @@ async function execute(
     timeout
   }, agent);
 
-  agent.infoLine(`[${name}] Container created: ${result.containerId}`);
+  agent.infoMessage(`[${name}] Container created: ${result.containerId}`);
   return result;
 }
 

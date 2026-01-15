@@ -18,7 +18,7 @@ async function execute(
     throw new Error(`[${name}] No container specified and no active container`);
   }
 
-  agent.infoLine(`[${name}] Stopping container: '${targetLabel}'`);
+  agent.infoMessage(`[${name}] Stopping container: '${targetLabel}'`);
   await sandbox.stopContainer(targetLabel, agent);
 
   return {success: true};

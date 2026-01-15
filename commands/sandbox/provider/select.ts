@@ -7,13 +7,13 @@ export async function select(_remainder: string, agent: Agent): Promise<void> {
   const available = sandbox.getAvailableProviders();
 
   if (available.length === 0) {
-    agent.infoLine("No sandbox providers are registered.");
+    agent.infoMessage("No sandbox providers are registered.");
     return;
   }
 
   if (available.length === 1) {
     sandbox.setActiveProvider(available[0], agent);
-    agent.infoLine(`Only one provider configured, auto-selecting: ${available[0]}`);
+    agent.infoMessage(`Only one provider configured, auto-selecting: ${available[0]}`);
     return;
   }
 
@@ -32,8 +32,8 @@ export async function select(_remainder: string, agent: Agent): Promise<void> {
 
   if (selectedValue) {
     sandbox.setActiveProvider(selectedValue, agent);
-    agent.infoLine(`Active provider set to: ${selectedValue}`);
+    agent.infoMessage(`Active provider set to: ${selectedValue}`);
   } else {
-    agent.infoLine("Provider selection cancelled.");
+    agent.infoMessage("Provider selection cancelled.");
   }
 }

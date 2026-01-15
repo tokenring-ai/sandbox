@@ -23,11 +23,11 @@ async function execute(
     throw new Error(`[${name}] No container specified and no active container`);
   }
 
-  agent.infoLine(`[${name}] Executing in '${targetLabel}': ${command}`);
+  agent.infoMessage(`[${name}] Executing in '${targetLabel}': ${command}`);
   const result = await sandbox.executeCommand(targetLabel, command, agent);
 
   if (result.exitCode !== 0) {
-    agent.errorLine(`[${name}] Command failed with exit code ${result.exitCode}`);
+    agent.errorMessage(`[${name}] Command failed with exit code ${result.exitCode}`);
   }
 
   return result;

@@ -18,7 +18,7 @@ async function execute(
     throw new Error(`[${name}] No container specified and no active container`);
   }
 
-  agent.infoLine(`[${name}] Getting logs for container: '${targetLabel}'`);
+  agent.infoMessage(`[${name}] Getting logs for container: '${targetLabel}'`);
   return await sandbox.getLogs(targetLabel, agent);
 }
 

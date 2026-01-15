@@ -6,15 +6,15 @@ export async function set(remainder: string, agent: Agent): Promise<void> {
   const providerName = remainder.trim();
 
   if (!providerName) {
-    agent.errorLine("Usage: /sandbox provider set <name>");
+    agent.errorMessage("Usage: /sandbox provider set <name>");
     return;
   }
 
   const available = sandbox.getAvailableProviders();
   if (available.includes(providerName)) {
     sandbox.setActiveProvider(providerName, agent);
-    agent.infoLine(`Provider set to: ${providerName}`);
+    agent.infoMessage(`Provider set to: ${providerName}`);
   } else {
-    agent.infoLine(`Provider "${providerName}" not found. Available providers: ${available.join(", ")}`);
+    agent.infoMessage(`Provider "${providerName}" not found. Available providers: ${available.join(", ")}`);
   }
 }

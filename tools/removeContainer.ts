@@ -18,7 +18,7 @@ async function execute(
     throw new Error(`[${name}] No container specified and no active container`);
   }
 
-  agent.infoLine(`[${name}] Removing container: '${targetLabel}'`);
+  agent.infoMessage(`[${name}] Removing container: '${targetLabel}'`);
   await sandbox.removeContainer(targetLabel, agent);
 
   return {success: true};

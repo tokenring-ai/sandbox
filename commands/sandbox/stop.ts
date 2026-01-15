@@ -6,10 +6,10 @@ export async function stop(remainder: string, agent: Agent): Promise<void> {
   const label = remainder.trim() || sandbox.getActiveContainer(agent);
   
   if (!label) {
-    agent.errorLine("No container specified and no active container");
+    agent.errorMessage("No container specified and no active container");
     return;
   }
   
   await sandbox.stopContainer(label, agent);
-  agent.infoLine(`Container stopped: ${label}`);
+  agent.infoMessage(`Container stopped: ${label}`);
 }
