@@ -1,4 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import type {TreeLeaf} from "@tokenring-ai/agent/question";
 import SandboxService from "../../../SandboxService.ts";
 import {SandboxState} from "../../../state/SandboxState.ts";
 
@@ -18,19 +19,27 @@ export async function select(_remainder: string, agent: Agent): Promise<void> {
   }
 
   const activeProvider = agent.getState(SandboxState).provider;
-  const formattedProviders = available.map(name => ({
+  const formattedProviders: TreeLeaf[] = available.map(name => ({
     name: `${name}${name === activeProvider ? " (current)" : ""}`,
     value: name,
   }));
 
-  const selectedValue = await agent.askHuman({
-    type: "askForSingleTreeSelection",
+  const selection = await agent.askQuestion({
     title: "Sandbox Provider Selection",
     message: "Select an active sandbox provider",
-    tree: {name: "Available Providers", children: formattedProviders}
+    question: {
+      type: 'treeSelect',
+      label: "Provider",
+      key: "result",
+      defaultValue: activeProvider ? [activeProvider] : undefined,
+      minimumSelections: 1,
+      maximumSelections: 1,
+      tree: formattedProviders
+    }
   });
 
-  if (selectedValue) {
+  if (selection) {
+    const selectedValue = selection[0];
     sandbox.setActiveProvider(selectedValue, agent);
     agent.infoMessage(`Active provider set to: ${selectedValue}`);
   } else {

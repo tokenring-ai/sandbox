@@ -3,15 +3,9 @@ import {TokenRingService} from "@tokenring-ai/app/types";
 import deepMerge from "@tokenring-ai/utility/object/deepMerge";
 import KeyedRegistry from "@tokenring-ai/utility/registry/KeyedRegistry";
 import {z} from "zod";
+import {type ExecuteResult, type LogsResult, type SandboxOptions, type SandboxProvider, type SandboxResult} from "./SandboxProvider.js";
 import {SandboxAgentConfigSchema, SandboxServiceConfigSchema} from "./schema.ts";
 import {SandboxState} from "./state/SandboxState.ts";
-import {
-  type SandboxProvider,
-  type ExecuteResult,
-  type LogsResult,
-  type SandboxOptions,
-  type SandboxResult
-} from "./SandboxProvider.js";
 
 export default class SandboxService implements TokenRingService {
   name = "SandboxService";
