@@ -4,8 +4,15 @@ import type {AgentStateSlice} from "@tokenring-ai/agent/types";
 import {z} from "zod";
 import {SandboxAgentConfigSchema} from "../schema.ts";
 
-export class SandboxState implements AgentStateSlice {
+const serializationSchema = z.object({
+  provider: z.string().nullable(),
+  activeContainer: z.string().nullable(),
+  labelToContainerId: z.array(z.tuple([z.string(), z.string()]))
+});
+
+export class SandboxState implements AgentStateSlice<typeof serializationSchema> {
   name = "SandboxState";
+  serializationSchema = serializationSchema;
   provider: string | null;
   activeContainer: string | null = null;
   labelToContainerId: Map<string, string> = new Map();
@@ -23,7 +30,7 @@ export class SandboxState implements AgentStateSlice {
 
   reset(what: ResetWhat[]): void {}
 
-  serialize(): object {
+  serialize(): z.output<typeof serializationSchema> {
     return {
       provider: this.provider,
       activeContainer: this.activeContainer,
@@ -31,7 +38,7 @@ export class SandboxState implements AgentStateSlice {
     };
   }
 
-  deserialize(data: any): void {
+  deserialize(data: z.output<typeof serializationSchema>): void {
     this.provider = data.provider;
     this.activeContainer = data.activeContainer;
     this.labelToContainerId = new Map(data.labelToContainerId);
