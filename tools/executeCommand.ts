@@ -4,6 +4,7 @@ import {z} from "zod";
 import SandboxService from "../SandboxService.js";
 
 const name = "sandbox_executeCommand";
+const displayName = "Sandbox/executeCommand";
 
 async function execute(
   {
@@ -41,5 +42,5 @@ const inputSchema = z.object({
 });
 
 export default {
-  name, description, inputSchema, execute,
+  name, displayName, description, inputSchema, execute,
 } satisfies TokenRingToolDefinition<typeof inputSchema>;

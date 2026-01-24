@@ -4,6 +4,7 @@ import {z} from "zod";
 import SandboxService from "../SandboxService.js";
 
 const name = "sandbox_removeContainer";
+const displayName = "Sandbox/removeContainer";
 
 async function execute(
   {
@@ -31,5 +32,5 @@ const inputSchema = z.object({
 });
 
 export default {
-  name, description, inputSchema, execute,
+  name, displayName, description, inputSchema, execute,
 } satisfies TokenRingToolDefinition<typeof inputSchema>;

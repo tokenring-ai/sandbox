@@ -21,7 +21,7 @@ export default {
   install(app, config) {
     if (config.sandbox) {
       app.waitForService(ChatService, chatService =>
-        chatService.addTools(packageJSON.name, tools)
+        chatService.addTools(tools)
       );
       app.waitForService(AgentCommandService, agentCommandService =>
         agentCommandService.addAgentCommands(chatCommands)
