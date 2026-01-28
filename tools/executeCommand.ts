@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
+import {TokenRingToolDefinition, type TokenRingToolJSONResult} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import SandboxService from "../SandboxService.js";
 
@@ -10,14 +10,10 @@ async function execute(
   {
     label,
     command
-  }: z.infer<typeof inputSchema>,
+  }: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+): Promise<TokenRingToolJSONResult<{ stdout: string; stderr: string; exitCode: number }>> {
   const sandbox = agent.requireServiceByType(SandboxService);
-
-  if (!command) {
-    throw new Error(`[${name}] command is required`);
-  }
 
   const targetLabel = label || sandbox.getActiveContainer(agent);
   if (!targetLabel) {
@@ -31,7 +27,10 @@ async function execute(
     agent.errorMessage(`[${name}] Command failed with exit code ${result.exitCode}`);
   }
 
-  return result;
+  return {
+    type: "json",
+    data: result
+  };
 }
 
 const description = "Execute a command in a sandbox container";

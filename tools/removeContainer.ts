@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
+import {TokenRingToolDefinition, type TokenRingToolJSONResult} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import SandboxService from "../SandboxService.js";
 
@@ -9,9 +9,9 @@ const displayName = "Sandbox/removeContainer";
 async function execute(
   {
     label
-  }: z.infer<typeof inputSchema>,
+  }: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<{ success: boolean }> {
+): Promise<TokenRingToolJSONResult<{ success: boolean }>> {
   const sandbox = agent.requireServiceByType(SandboxService);
 
   const targetLabel = label || sandbox.getActiveContainer(agent);
@@ -22,7 +22,10 @@ async function execute(
   agent.infoMessage(`[${name}] Removing container: '${targetLabel}'`);
   await sandbox.removeContainer(targetLabel, agent);
 
-  return {success: true};
+  return {
+    type: "json",
+    data: {success: true}
+  };
 }
 
 const description = "Remove a sandbox container";
