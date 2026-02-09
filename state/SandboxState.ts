@@ -1,5 +1,4 @@
 import {Agent} from "@tokenring-ai/agent";
-import type {ResetWhat} from "@tokenring-ai/agent/AgentEvents";
 import type {AgentStateSlice} from "@tokenring-ai/agent/types";
 import {z} from "zod";
 import {SandboxAgentConfigSchema} from "../schema.ts";
@@ -11,7 +10,7 @@ const serializationSchema = z.object({
 });
 
 export class SandboxState implements AgentStateSlice<typeof serializationSchema> {
-  name = "SandboxState";
+  readonly name = "SandboxState";
   serializationSchema = serializationSchema;
   provider: string | null;
   activeContainer: string | null = null;
@@ -27,8 +26,6 @@ export class SandboxState implements AgentStateSlice<typeof serializationSchema>
     this.activeContainer = parentState.activeContainer;
     this.labelToContainerId = new Map(parentState.labelToContainerId);
   }
-
-  reset(what: ResetWhat[]): void {}
 
   serialize(): z.output<typeof serializationSchema> {
     return {

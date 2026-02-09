@@ -8,7 +8,7 @@ import {SandboxAgentConfigSchema, SandboxServiceConfigSchema} from "./schema.ts"
 import {SandboxState} from "./state/SandboxState.ts";
 
 export default class SandboxService implements TokenRingService {
-  name = "SandboxService";
+  readonly name = "SandboxService";
   description = "Abstract interface for sandbox operations";
 
   private providerRegistry = new KeyedRegistry<SandboxProvider>();
