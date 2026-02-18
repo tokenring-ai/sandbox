@@ -21,12 +21,13 @@ bun install @tokenring-ai/sandbox
 
 ```
 pkg/sandbox/
-├── index.ts                 # Package entry point and plugin definition
-├── SandboxProvider.ts       # Abstract interface for providers
+├── index.ts                 # Package entry point
+├── SandboxProvider.ts       # Abstract interface for providers and type definitions
 ├── SandboxService.ts        # Core service implementation
 ├── schema.ts                # Schema definitions for validation
 ├── tools.ts                 # Tool exports
 ├── chatCommands.ts          # Chat command exports
+├── plugin.ts                # Plugin definition and installation logic
 ├── state/
 │   └── SandboxState.ts      # Agent state management for sandbox
 ├── tools/
@@ -111,7 +112,7 @@ The `SandboxService` manages multiple providers and tracks the active container 
 - `getAvailableProviders(): string[]`
   - Returns names of all registered providers
 
-- `attach(agent: Agent): Promise<void>`
+- `attach(agent: Agent): void`
   - Attaches the service to an agent and initializes agent state
 
 - `requireActiveProvider(agent: Agent): SandboxProvider`
@@ -162,9 +163,6 @@ The `SandboxState` class manages agent state for sandbox operations, implementin
 - `transferStateFromParent(parent: Agent): void`
   - Transfers state from a parent agent (for agent teams)
 
-- `reset(what: ResetWhat[]): void`
-  - Resets state based on reset specifications
-
 - `serialize(): object`
   - Serializes state for persistence
 
@@ -202,13 +200,13 @@ z.object({
 
 // sandbox_executeCommand
 z.object({
-  label: z.string().optional().describe("Container label (uses active if not specified)"),
+  label: z.string().optional().describe("Container label (uses active container if not specified)"),
   command: z.string().min(1).describe("Command to execute"),
 });
 
-// All other tools (stop, getLogs, remove)
+// sandbox_stopContainer, sandbox_getLogs, sandbox_removeContainer
 z.object({
-  label: z.string().optional().describe("Container label (uses active if not specified)"),
+  label: z.string().optional().describe("Container label (uses active container if not specified)"),
 });
 ```
 
@@ -259,16 +257,7 @@ import TokenRingApp from "@tokenring-ai/app";
 import sandboxPlugin from "@tokenring-ai/sandbox";
 
 const app = new TokenRingApp();
-app.install(sandboxPlugin);
-```
-
-### Configuration
-
-Configure sandbox providers in your app configuration:
-
-```typescript
-// Example configuration
-const config = {
+app.install(sandboxPlugin, {
   sandbox: {
     providers: {
       docker: {
@@ -280,9 +269,7 @@ const config = {
       provider: "docker"
     }
   }
-};
-
-app.install(sandboxPlugin, config.sandbox);
+});
 ```
 
 ### Using the Service Directly
@@ -327,85 +314,45 @@ await agent.executeTool('sandbox_executeCommand', {
 });
 ```
 
-## API Reference
+### Provider Configuration
 
-### SandboxService
-
-```typescript
-class SandboxService implements TokenRingService {
-  name: string;
-  description: string;
-  readonly options: z.output<typeof SandboxServiceConfigSchema>;
-
-  registerProvider(name: string, resource: SandboxProvider): void;
-  getAvailableProviders(): string[];
-  attach(agent: Agent): Promise<void>;
-  requireActiveProvider(agent: Agent): SandboxProvider;
-  getActiveProvider(agent: Agent): SandboxProvider | null;
-  setActiveProvider(name: string, agent: Agent): void;
-  getActiveContainer(agent: Agent): string | null;
-  setActiveContainer(containerId: string, agent: Agent): void;
-  createContainer(options: SandboxOptions | undefined, agent: Agent): Promise<SandboxResult>;
-  executeCommand(label: string, command: string, agent: Agent): Promise<ExecuteResult>;
-  stopContainer(label: string, agent: Agent): Promise<void>;
-  getLogs(label: string, agent: Agent): Promise<LogsResult>;
-  removeContainer(label: string, agent: Agent): Promise<void>;
-}
-```
-
-### SandboxProvider Interface
+The plugin supports configuring multiple sandbox providers at installation time:
 
 ```typescript
-interface SandboxProvider {
-  createContainer(options?: SandboxOptions): Promise<SandboxResult>;
-  executeCommand(containerId: string, command: string): Promise<ExecuteResult>;
-  stopContainer(containerId: string): Promise<void>;
-  getLogs(containerId: string): Promise<LogsResult>;
-  removeContainer(containerId: string): Promise<void>;
-}
-```
-
-### SandboxState
-
-```typescript
-class SandboxState implements AgentStateSlice {
-  name: string;
-  provider: string | null;
-  activeContainer: string | null;
-  labelToContainerId: Map<string, string>;
-
-  constructor(readonly initialConfig: z.output<typeof SandboxAgentConfigSchema>);
-  transferStateFromParent(parent: Agent): void;
-  reset(what: ResetWhat[]): void;
-  serialize(): object;
-  deserialize(data: any): void;
-  show(): string[];
-}
-```
-
-### Exports
-
-```typescript
-// Main exports
-export { default as SandboxService } from "./SandboxService.ts";
-export type { SandboxProvider } from "./SandboxProvider.ts";
-
-// Configuration schemas
-export const SandboxServiceConfigSchema: z.ZodType;
-export const SandboxAgentConfigSchema: z.ZodType;
+app.install(sandboxPlugin, {
+  sandbox: {
+    providers: {
+      docker: {
+        type: "docker",
+        // Docker-specific configuration
+      },
+      kubernetes: {
+        type: "kubernetes",
+        // Kubernetes-specific configuration
+      }
+    },
+    agentDefaults: {
+      provider: "docker"
+    }
+  }
+});
 ```
 
 ## Configuration Options
 
-### SandboxServiceConfigSchema
+### Plugin Configuration Schema
+
+The plugin accepts a configuration with the following structure:
 
 ```typescript
-z.object({
-  providers: z.record(z.string(), z.any()).optional(),
-  agentDefaults: z.object({
-    provider: z.string()
-  })
-})
+{
+  sandbox: {
+    providers: Record<string, { type: string; [key: string]: any }>;  // Optional provider configurations
+    agentDefaults: {
+      provider?: string;  // Optional default provider for agents
+    }
+  }
+}
 ```
 
 ### SandboxAgentConfigSchema
@@ -475,6 +422,47 @@ class MyCustomProvider implements SandboxProvider {
   }
 }
 ```
+
+## Exports
+
+### Main Exports
+
+```typescript
+export { SandboxService } from "./SandboxService.ts";
+export type { SandboxProvider } from "./SandboxProvider.ts";
+```
+
+### Plugin Export
+
+```typescript
+export default {
+  name: "@tokenring-ai/sandbox",
+  version: "0.2.0",
+  description: "Abstract sandbox interface for Token Ring",
+  install(app, config) {
+    // Registers tools, chat commands, and sandbox service
+  },
+  config: z.object({
+    sandbox: SandboxServiceConfigSchema
+  })
+};
+```
+
+## Dependencies
+
+### Production Dependencies
+
+- `@tokenring-ai/app`: 0.2.0
+- `@tokenring-ai/chat`: 0.2.0
+- `@tokenring-ai/docker`: 0.2.0
+- `@tokenring-ai/agent`: 0.2.0
+- `@tokenring-ai/utility`: 0.2.0
+- `zod`: ^4.3.6
+
+### Development Dependencies
+
+- `vitest`: ^4.0.18
+- `typescript`: ^5.9.3
 
 ## License
 
