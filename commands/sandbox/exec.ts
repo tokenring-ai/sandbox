@@ -1,23 +1,24 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import SandboxService from "../../SandboxService.ts";
 
-export async function exec(remainder: string, agent: Agent): Promise<void> {
+export async function exec(remainder: string, agent: Agent): Promise<string> {
   const sandbox = agent.requireServiceByType(SandboxService);
   const command = remainder.trim();
   
   if (!command) {
-    agent.errorMessage("Usage: /sandbox exec <command>");
-    return;
+    throw new CommandFailedError("Usage: /sandbox exec <command>");
   }
   
   const activeContainer = sandbox.getActiveContainer(agent);
   if (!activeContainer) {
-    agent.errorMessage("No active container. Create one first with /sandbox create");
-    return;
+    throw new CommandFailedError("No active container. Create one first with /sandbox create");
   }
   
   const result = await sandbox.executeCommand(activeContainer, command, agent);
-  if (result.stdout) agent.infoMessage(`stdout: ${result.stdout}`);
-  if (result.stderr) agent.errorMessage(`stderr: ${result.stderr}`);
-  agent.infoMessage(`Exit code: ${result.exitCode}`);
+  const lines: string[] = [];
+  if (result.stdout) lines.push(`stdout: ${result.stdout}`);
+  if (result.stderr) lines.push(`stderr: ${result.stderr}`);
+  lines.push(`Exit code: ${result.exitCode}`);
+  return lines.join("\n");
 }

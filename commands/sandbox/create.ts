@@ -1,15 +1,15 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import SandboxService from "../../SandboxService.ts";
 
-export async function create(remainder: string, agent: Agent): Promise<void> {
+export async function create(remainder: string, agent: Agent): Promise<string> {
   const sandbox = agent.requireServiceByType(SandboxService);
   const [label, image] = remainder.trim().split(/\s+/);
   
   if (!label) {
-    agent.errorMessage("Usage: /sandbox create <label> [image]");
-    return;
+    throw new CommandFailedError("Usage: /sandbox create <label> [image]");
   }
   
   const result = await sandbox.createContainer({label, image}, agent);
-  agent.infoMessage(`Container created: ${result.containerId} (${result.status})`);
+  return `Container created: ${result.containerId} (${result.status})`;
 }
