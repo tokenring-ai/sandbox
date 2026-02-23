@@ -1,20 +1,20 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import SandboxService from "../../../SandboxService.ts";
 
-export async function set(remainder: string, agent: Agent): Promise<void> {
+export async function set(remainder: string, agent: Agent): Promise<string> {
   const sandbox = agent.requireServiceByType(SandboxService);
   const providerName = remainder.trim();
 
   if (!providerName) {
-    agent.errorMessage("Usage: /sandbox provider set <name>");
-    return;
+    throw new CommandFailedError("Usage: /sandbox provider set <name>");
   }
 
   const available = sandbox.getAvailableProviders();
   if (available.includes(providerName)) {
     sandbox.setActiveProvider(providerName, agent);
-    agent.infoMessage(`Provider set to: ${providerName}`);
+    return `Provider set to: ${providerName}`;
   } else {
-    agent.infoMessage(`Provider "${providerName}" not found. Available providers: ${available.join(", ")}`);
+    return `Provider "${providerName}" not found. Available providers: ${available.join(", ")}`;
   }
 }

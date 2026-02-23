@@ -1,7 +1,7 @@
 import Agent from "@tokenring-ai/agent/Agent";
 import {SandboxState} from "../../../state/SandboxState.ts";
 
-export async function get(_remainder: string, agent: Agent): Promise<void> {
+export async function get(_remainder: string, agent: Agent): Promise<string> {
   const activeProvider = agent.getState(SandboxState).provider;
-  agent.infoMessage(`Current provider: ${activeProvider ?? "(none)"}`);
+  return `Current provider: ${activeProvider ?? "(none)"}`;
 }

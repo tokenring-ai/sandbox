@@ -3,19 +3,17 @@ import type {TreeLeaf} from "@tokenring-ai/agent/question";
 import SandboxService from "../../../SandboxService.ts";
 import {SandboxState} from "../../../state/SandboxState.ts";
 
-export async function select(_remainder: string, agent: Agent): Promise<void> {
+export async function select(_remainder: string, agent: Agent): Promise<string> {
   const sandbox = agent.requireServiceByType(SandboxService);
   const available = sandbox.getAvailableProviders();
 
   if (available.length === 0) {
-    agent.infoMessage("No sandbox providers are registered.");
-    return;
+    return "No sandbox providers are registered.";
   }
 
   if (available.length === 1) {
     sandbox.setActiveProvider(available[0], agent);
-    agent.infoMessage(`Only one provider configured, auto-selecting: ${available[0]}`);
-    return;
+    return `Only one provider configured, auto-selecting: ${available[0]}`;
   }
 
   const activeProvider = agent.getState(SandboxState).provider;
@@ -41,8 +39,8 @@ export async function select(_remainder: string, agent: Agent): Promise<void> {
   if (selection) {
     const selectedValue = selection[0];
     sandbox.setActiveProvider(selectedValue, agent);
-    agent.infoMessage(`Active provider set to: ${selectedValue}`);
+    return `Active provider set to: ${selectedValue}`;
   } else {
-    agent.infoMessage("Provider selection cancelled.");
+    return "Provider selection cancelled.";
   }
 }
