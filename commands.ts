@@ -1,5 +1,5 @@
 import sandbox from "./commands/sandbox.ts";
 
-export default {
+export default [
   sandbox,
-};
+];

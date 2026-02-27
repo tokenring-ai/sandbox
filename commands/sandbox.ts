@@ -115,6 +115,7 @@ const execute = createSubcommandRouter({
   provider,
 });
 export default {
+  name: "sandbox",
   description,
   execute,
   help,
