@@ -1,8 +1,19 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import {SandboxState} from "../../state/SandboxState.ts";
 
-export async function status(_remainder: string, agent: Agent): Promise<string> {
-  const state = agent.getState(SandboxState);
-  
-  return `Active container: ${state.activeContainer || "none"}\nActive provider: ${state.provider || "none"}`;
-}
+export default {
+  name: "sandbox status",
+  description: "/sandbox status - Show sandbox status",
+  help: `# /sandbox status
+
+Show the current sandbox status including active container and provider.
+
+## Example
+
+/sandbox status`,
+  execute: async (_remainder: string, agent: Agent): Promise<string> => {
+    const state = agent.getState(SandboxState);
+    return `Active container: ${state.activeContainer || "none"}\nActive provider: ${state.provider || "none"}`;
+  },
+} satisfies TokenRingAgentCommand;

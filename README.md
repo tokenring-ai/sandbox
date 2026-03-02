@@ -26,30 +26,29 @@ pkg/sandbox/
 ├── SandboxService.ts        # Core service implementation
 ├── schema.ts                # Schema definitions for validation
 ├── tools.ts                 # Tool exports
-├── chatCommands.ts          # Chat command exports
+├── commands.ts              # Chat command exports
 ├── plugin.ts                # Plugin definition and installation logic
 ├── state/
 │   └── SandboxState.ts      # Agent state management for sandbox
-├── tools/
-│   ├── createContainer.ts   # sandbox_createContainer tool
-│   ├── executeCommand.ts    # sandbox_executeCommand tool
-│   ├── stopContainer.ts     # sandbox_stopContainer tool
-│   ├── getLogs.ts           # sandbox_getLogs tool
-│   └── removeContainer.ts   # sandbox_removeContainer tool
 ├── commands/
 │   └── sandbox/
-│       ├── sandbox.ts       # Main command entry with help
 │       ├── create.ts        # create action
 │       ├── exec.ts          # exec action
 │       ├── stop.ts          # stop action
 │       ├── logs.ts          # logs action
 │       ├── remove.ts        # remove action
 │       ├── status.ts        # status action
-│       └── provider/        # provider subcommand
+│       └── provider/
 │           ├── get.ts       # get current provider
 │           ├── set.ts       # set provider by name
 │           ├── reset.ts     # reset to initial provider
 │           └── select.ts    # interactive provider selection
+├── tools/
+│   ├── createContainer.ts   # sandbox_createContainer tool
+│   ├── executeCommand.ts    # sandbox_executeCommand tool
+│   ├── stopContainer.ts     # sandbox_stopContainer tool
+│   ├── getLogs.ts           # sandbox_getLogs tool
+│   └── removeContainer.ts   # sandbox_removeContainer tool
 ├── package.json
 ├── LICENSE
 └── README.md
@@ -172,7 +171,7 @@ The `SandboxState` class manages agent state for sandbox operations, implementin
 - `show(): string[]`
   - Returns state summary strings
 
-### Tools
+## Tools
 
 Tools are agent-executable functions that wrap service methods, providing logging and validation via Zod schemas. Exported from `tools.ts`.
 
@@ -210,7 +209,7 @@ z.object({
 });
 ```
 
-### Chat Commands
+## Chat Commands
 
 The `/sandbox` command provides interactive control in agent chats.
 
@@ -225,11 +224,11 @@ The `/sandbox` command provides interactive control in agent chats.
 | Action | Description |
 |--------|-------------|
 | `create <label> [image]` | Create a new container with label and optional image |
-| `exec <command>` | Execute command in active container |
-| `stop [label]` | Stop container (uses active if unspecified) |
-| `logs [label]` | Get container logs (uses active if unspecified) |
-| `remove [label]` | Remove container (uses active if unspecified) |
-| `status` | Show active container and provider |
+| `exec <command>` | Execute command in active container (requires active container) |
+| `stop [label]` | Stop container (uses active if unspecified, requires container) |
+| `logs [label]` | Get container logs (uses active if unspecified, requires container) |
+| `remove [label]` | Remove container (uses active if unspecified, requires container) |
+| `status` | Show active container and provider (no active container required) |
 | `provider get` | Show current provider |
 | `provider set <name>` | Set provider by name |
 | `provider reset` | Reset provider to initial configuration |
@@ -237,13 +236,109 @@ The `/sandbox` command provides interactive control in agent chats.
 
 **Usage Examples:**
 
-```
+```bash
 /sandbox create myapp ubuntu:22.04
 /sandbox exec ls -la /app
 /sandbox logs
 /sandbox stop
 /sandbox status
 /sandbox provider set docker
+```
+
+### Command Details
+
+#### `/sandbox create <label> [image]`
+
+Create a new sandbox container with an optional image.
+
+**Example:**
+```bash
+/sandbox create myapp
+/sandbox create myapp ubuntu:22.04
+```
+
+#### `/sandbox exec <command>`
+
+Execute a command in the active container. Requires an active container to exist.
+
+**Example:**
+```bash
+/sandbox exec ls -la /app
+```
+
+#### `/sandbox stop [label]`
+
+Stop a running container. Uses the active container if no label is specified.
+
+**Example:**
+```bash
+/sandbox stop
+/sandbox stop myapp
+```
+
+#### `/sandbox logs [label]`
+
+Retrieve logs from a container. Uses the active container if no label is specified.
+
+**Example:**
+```bash
+/sandbox logs
+/sandbox logs myapp
+```
+
+#### `/sandbox remove [label]`
+
+Remove a container. Uses the active container if no label is specified.
+
+**Example:**
+```bash
+/sandbox remove
+/sandbox remove myapp
+```
+
+#### `/sandbox status`
+
+Show the current sandbox status including active container and provider.
+
+**Example:**
+```bash
+/sandbox status
+```
+
+#### `/sandbox provider get`
+
+Display the currently active sandbox provider.
+
+**Example:**
+```bash
+/sandbox provider get
+```
+
+#### `/sandbox provider set <name>`
+
+Set the active sandbox provider by name.
+
+**Example:**
+```bash
+/sandbox provider set docker
+```
+
+#### `/sandbox provider reset`
+
+Reset the active sandbox provider to the initial configured value.
+
+**Example:**
+```bash
+/sandbox provider reset
+```
+
+#### `/sandbox provider select`
+
+Interactively select the active sandbox provider. Auto-selects if only one provider is configured.
+
+**Example:**
+```bash
+/sandbox provider select
 ```
 
 ## Usage Examples
@@ -349,10 +444,21 @@ The plugin accepts a configuration with the following structure:
   sandbox: {
     providers: Record<string, { type: string; [key: string]: any }>;  // Optional provider configurations
     agentDefaults: {
-      provider?: string;  // Optional default provider for agents
+      provider: string;  // Required default provider for agents
     }
   }
 }
+```
+
+### SandboxServiceConfigSchema
+
+```typescript
+z.object({
+  providers: z.record(z.string(), z.any()).optional(),
+  agentDefaults: z.object({
+    provider: z.string()  // Required
+  })
+});
 ```
 
 ### SandboxAgentConfigSchema
