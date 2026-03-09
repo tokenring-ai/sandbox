@@ -1,5 +1,5 @@
 import {Agent} from "@tokenring-ai/agent";
-import type {AgentStateSlice} from "@tokenring-ai/agent/types";
+import {AgentStateSlice} from "@tokenring-ai/agent/types";
 import {z} from "zod";
 import {SandboxAgentConfigSchema} from "../schema.ts";
 
@@ -9,14 +9,13 @@ const serializationSchema = z.object({
   labelToContainerId: z.array(z.tuple([z.string(), z.string()]))
 });
 
-export class SandboxState implements AgentStateSlice<typeof serializationSchema> {
-  readonly name = "SandboxState";
-  serializationSchema = serializationSchema;
+export class SandboxState extends AgentStateSlice<typeof serializationSchema> {
   provider: string | null;
   activeContainer: string | null = null;
   labelToContainerId: Map<string, string> = new Map();
 
   constructor(readonly initialConfig: z.output<typeof SandboxAgentConfigSchema>) {
+    super("SandboxState",serializationSchema);
     this.provider = initialConfig.provider ?? null;
   }
 

@@ -14,7 +14,7 @@ Key features include:
 ## Installation
 
 ```bash
-bun install @tokenring-ai/sandbox
+bun add @tokenring-ai/sandbox
 ```
 
 ## Package Structure
@@ -156,6 +156,7 @@ The `SandboxState` class manages agent state for sandbox operations, implementin
 - `provider: string | null` - Current active provider name
 - `activeContainer: string | null` - Current active container label
 - `labelToContainerId: Map<string, string>` - Maps labels to container IDs
+- `initialConfig: z.output<typeof SandboxAgentConfigSchema>` - Initial configuration
 
 **State Methods:**
 
@@ -341,6 +342,32 @@ Interactively select the active sandbox provider. Auto-selects if only one provi
 /sandbox provider select
 ```
 
+## Error Handling
+
+The package throws errors in various scenarios:
+
+- **No Active Provider**: When attempting to perform operations without an active provider set
+  ```
+  [SandboxService] No active provider set
+  ```
+
+- **No Container Specified**: When a tool or command requires a container but none is specified and no active container exists
+  ```
+  [sandbox_executeCommand] No container specified and no active container
+  ```
+
+- **Command Failed**: When a command executes with a non-zero exit code, the tool returns the exit code but does not throw
+
+- **Provider Not Found**: When attempting to set a provider that is not registered
+  ```
+  Provider "docker" not found. Available providers: kubernetes
+  ```
+
+- **No Initial Provider**: When attempting to reset to an initial provider that was not configured
+  ```
+  No initial provider configured
+  ```
+
 ## Usage Examples
 
 ### Plugin Registration
@@ -493,6 +520,8 @@ bun run build
 bun run test
 ```
 
+Note: The package currently uses vitest for testing but does not include test files. Tests can be added by creating `*.test.ts` files in the package directory.
+
 ### Extending
 
 To add new sandbox providers:
@@ -500,19 +529,22 @@ To add new sandbox providers:
 1. Create a class that implements `SandboxProvider` interface
 2. Implement all required methods
 3. Register the provider with `SandboxService.registerProvider()`
+4. Add provider type handling in `plugin.ts` if using plugin registration
 
 Example:
 
 ```typescript
-import { SandboxProvider } from "@tokenring-ai/sandbox";
+import { SandboxProvider, SandboxOptions, SandboxResult, ExecuteResult, LogsResult } from "@tokenring-ai/sandbox";
 
 class MyCustomProvider implements SandboxProvider {
   async createContainer(options?: SandboxOptions): Promise<SandboxResult> {
     // Implementation
+    return { containerId: 'custom-id', status: 'running' };
   }
   
   async executeCommand(containerId: string, command: string): Promise<ExecuteResult> {
     // Implementation
+    return { stdout: '', stderr: '', exitCode: 0 };
   }
   
   async stopContainer(containerId: string): Promise<void> {
@@ -521,6 +553,7 @@ class MyCustomProvider implements SandboxProvider {
   
   async getLogs(containerId: string): Promise<LogsResult> {
     // Implementation
+    return { logs: '' };
   }
   
   async removeContainer(containerId: string): Promise<void> {
@@ -560,7 +593,7 @@ export default {
 
 - `@tokenring-ai/app`: 0.2.0
 - `@tokenring-ai/chat`: 0.2.0
-- `@tokenring-ai/docker`: 0.2.0
+- `@tokenring-ai/docker`: 0.2.0 (used when docker provider is configured)
 - `@tokenring-ai/agent`: 0.2.0
 - `@tokenring-ai/utility`: 0.2.0
 - `zod`: ^4.3.6
@@ -573,3 +606,5 @@ export default {
 ## License
 
 MIT License - see [LICENSE](./LICENSE) file for details.
+
+Copyright (c) 2025 Mark Dierolf
