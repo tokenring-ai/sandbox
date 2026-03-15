@@ -105,14 +105,17 @@ The `SandboxService` manages multiple providers and tracks the active container 
 
 **Service Methods:**
 
-- `registerProvider(name: string, resource: SandboxProvider): void`
-  - Registers a provider in the internal registry
+- `readonly name: string` - Service name ("SandboxService")
+- `readonly description: string` - Service description
+- `readonly options: z.output<typeof SandboxServiceConfigSchema>` - Service configuration options
+- `registerProvider: (name: string, resource: SandboxProvider) => void`
+  - Registers a provider in the internal registry using `KeyedRegistry`
 
-- `getAvailableProviders(): string[]`
+- `getAvailableProviders: () => string[]`
   - Returns names of all registered providers
 
 - `attach(agent: Agent): void`
-  - Attaches the service to an agent and initializes agent state
+  - Attaches the service to an agent and initializes agent state with merged configuration
 
 - `requireActiveProvider(agent: Agent): SandboxProvider`
   - Gets the active provider or throws an error if none is set
@@ -121,31 +124,35 @@ The `SandboxService` manages multiple providers and tracks the active container 
   - Gets the active provider or returns null
 
 - `setActiveProvider(name: string, agent: Agent): void`
-  - Sets the active provider by name
+  - Sets the active provider by name in agent state
 
 - `getActiveContainer(agent: Agent): string | null`
-  - Gets the active container label or ID
+  - Gets the active container label
 
 - `setActiveContainer(containerId: string, agent: Agent): void`
-  - Sets the active container
+  - Sets the active container label in agent state
 
-- `createContainer(options: SandboxOptions | undefined, agent: Agent): Promise<SandboxResult>`
+- `async createContainer(options: SandboxOptions | undefined, agent: Agent): Promise<SandboxResult>`
   - Creates a container using the active provider
   - Sets the created container as active with label mapping
+  - Returns `{ containerId: label, status }` where label is from options or the actual container ID
 
-- `executeCommand(label: string, command: string, agent: Agent): Promise<ExecuteResult>`
+- `async executeCommand(label: string, command: string, agent: Agent): Promise<ExecuteResult>`
   - Executes a command in the specified container
+  - Uses label-to-container ID mapping from state
+  - If label is not found in map, uses label as container ID directly
+
+- `async stopContainer(label: string, agent: Agent): Promise<void>`
+  - Stops the specified container
+  - Clears active container if it matches the stopped container
+
+- `async getLogs(label: string, agent: Agent): Promise<LogsResult>`
+  - Retrieves logs from the specified container
   - Uses label-to-container ID mapping
 
-- `stopContainer(label: string, agent: Agent): Promise<void>`
-  - Stops the specified container
-  - Clears active container if it matches
-
-- `getLogs(label: string, agent: Agent): Promise<LogsResult>`
-  - Retrieves logs from the specified container
-
-- `removeContainer(label: string, agent: Agent): Promise<void>`
+- `async removeContainer(label: string, agent: Agent): Promise<void>`
   - Removes the specified container and its label mapping
+  - Clears active container if it matches the removed container
 
 ### SandboxState
 
@@ -160,17 +167,24 @@ The `SandboxState` class manages agent state for sandbox operations, implementin
 
 **State Methods:**
 
+- `constructor(initialConfig: z.output<typeof SandboxAgentConfigSchema>)`
+  - Initializes state with provider from config or null
+
 - `transferStateFromParent(parent: Agent): void`
   - Transfers state from a parent agent (for agent teams)
+  - Copies provider, activeContainer, and labelToContainerId map
 
-- `serialize(): object`
+- `serialize(): z.output<typeof serializationSchema>`
   - Serializes state for persistence
+  - Converts `labelToContainerId` Map to array of tuples
 
-- `deserialize(data: any): void`
+- `deserialize(data: z.output<typeof serializationSchema>): void`
   - Deserializes persisted state
+  - Converts array of tuples back to Map
 
 - `show(): string[]`
-  - Returns state summary strings
+  - Returns state summary strings for display
+  - Returns active provider and active container status
 
 ## Tools
 
@@ -204,11 +218,33 @@ z.object({
   command: z.string().min(1).describe("Command to execute"),
 });
 
-// sandbox_stopContainer, sandbox_getLogs, sandbox_removeContainer
+// sandbox_stopContainer
+z.object({
+  label: z.string().optional().describe("Container label (uses active container if not specified)"),
+});
+
+// sandbox_getLogs
+z.object({
+  label: z.string().optional().describe("Container label (uses active container if not specified)"),
+});
+
+// sandbox_removeContainer
 z.object({
   label: z.string().optional().describe("Container label (uses active container if not specified)"),
 });
 ```
+
+**Tool Behavior:**
+
+- **sandbox_createContainer**: Creates a container and automatically sets it as the active container. The returned `containerId` is the label (if provided) or the actual container ID from the provider.
+
+- **sandbox_executeCommand**: Throws an error if no label is specified and no active container exists. Logs command execution and exit code.
+
+- **sandbox_stopContainer**: Throws an error if no label is specified and no active container exists. Clears the active container state after stopping.
+
+- **sandbox_getLogs**: Throws an error if no label is specified and no active container exists.
+
+- **sandbox_removeContainer**: Throws an error if no label is specified and no active container exists. Removes the label-to-container mapping and clears active container state.
 
 ## Chat Commands
 
@@ -356,7 +392,7 @@ The package throws errors in various scenarios:
   [sandbox_executeCommand] No container specified and no active container
   ```
 
-- **Command Failed**: When a command executes with a non-zero exit code, the tool returns the exit code but does not throw
+- **Command Failed**: When a command executes with a non-zero exit code, the tool returns the exit code but does not throw. The error is logged via `agent.errorMessage()`.
 
 - **Provider Not Found**: When attempting to set a provider that is not registered
   ```
@@ -367,6 +403,8 @@ The package throws errors in various scenarios:
   ```
   No initial provider configured
   ```
+
+- **Command Failed (Chat Command)**: Chat commands throw `CommandFailedError` with usage information when required arguments are missing.
 
 ## Usage Examples
 
@@ -600,7 +638,7 @@ export default {
 
 ### Development Dependencies
 
-- `vitest`: ^4.0.18
+- `vitest`: ^4.1.0
 - `typescript`: ^5.9.3
 
 ## License
