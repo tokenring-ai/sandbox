@@ -11,7 +11,8 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
   return `Container removed: ${label}`;
 }
 
-export default { name: "sandbox remove", description: "/sandbox remove - Remove a container", help: `# /sandbox remove [label]
+export default {
+  name: "sandbox remove", description: "Remove a container", help: `# /sandbox remove [label]
 
 Remove a container. Uses the active container if no label is specified.
 

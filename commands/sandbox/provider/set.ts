@@ -15,7 +15,8 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
   return `Provider "${providerName}" not found. Available providers: ${available.join(", ")}`;
 }
 
-export default { name: "sandbox provider set", description: "/sandbox provider set - Set the active provider", help: `# /sandbox provider set <name>
+export default {
+  name: "sandbox provider set", description: "Set the active provider", help: `# /sandbox provider set <name>
 
 Set the active sandbox provider by name.
 

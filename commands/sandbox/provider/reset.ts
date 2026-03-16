@@ -11,7 +11,8 @@ async function execute(_remainder: string, agent: Agent): Promise<string> {
   return `Provider reset to ${initialProvider}`;
 }
 
-export default { name: "sandbox provider reset", description: "/sandbox provider reset - Reset to initial provider", help: `# /sandbox provider reset
+export default {
+  name: "sandbox provider reset", description: "Reset to initial provider", help: `# /sandbox provider reset
 
 Reset the active sandbox provider to the initial configured value.
 

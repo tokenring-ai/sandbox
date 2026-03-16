@@ -4,7 +4,7 @@ import {SandboxState} from "../../../state/SandboxState.ts";
 
 export default {
   name: "sandbox provider get",
-  description: "/sandbox provider get - Show current provider",
+  description: "Show current provider",
   help: `# /sandbox provider get
 
 Display the currently active sandbox provider.

@@ -11,7 +11,8 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
   return `Logs:\n${result.logs}`;
 }
 
-export default { name: "sandbox logs", description: "/sandbox logs - Get container logs", help: `# /sandbox logs [label]
+export default {
+  name: "sandbox logs", description: "Get container logs", help: `# /sandbox logs [label]
 
 Retrieve logs from a container. Uses the active container if no label is specified.
 

@@ -4,7 +4,7 @@ import {SandboxState} from "../../state/SandboxState.ts";
 
 export default {
   name: "sandbox status",
-  description: "/sandbox status - Show sandbox status",
+  description: "Show sandbox status",
   help: `# /sandbox status
 
 Show the current sandbox status including active container and provider.

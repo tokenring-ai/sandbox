@@ -10,7 +10,8 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
   return `Container created: ${result.containerId} (${result.status})`;
 }
 
-export default { name: "sandbox create", description: "/sandbox create - Create a container", help: `# /sandbox create <label> [image]
+export default {
+  name: "sandbox create", description: "Create a container", help: `# /sandbox create <label> [image]
 
 Create a new sandbox container with an optional image.
 

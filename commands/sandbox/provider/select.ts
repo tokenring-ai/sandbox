@@ -26,7 +26,8 @@ async function execute(_remainder: string, agent: Agent): Promise<string> {
   return "Provider selection cancelled.";
 }
 
-export default { name: "sandbox provider select", description: "/sandbox provider select - Interactively select a provider", help: `# /sandbox provider select
+export default {
+  name: "sandbox provider select", description: "Interactively select a provider", help: `# /sandbox provider select
 
 Interactively select the active sandbox provider. Auto-selects if only one provider is configured.
 

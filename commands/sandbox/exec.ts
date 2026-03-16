@@ -17,7 +17,8 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
   return lines.join("\n");
 }
 
-export default { name: "sandbox exec", description: "/sandbox exec - Execute a command in the active container", help: `# /sandbox exec <command>
+export default {
+  name: "sandbox exec", description: "Execute a command in the active container", help: `# /sandbox exec <command>
 
 Execute a command in the active container. Requires an active container to exist.
 

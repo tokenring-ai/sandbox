@@ -11,7 +11,8 @@ async function execute(remainder: string, agent: Agent): Promise<string> {
   return `Container stopped: ${label}`;
 }
 
-export default { name: "sandbox stop", description: "/sandbox stop - Stop a container", help: `# /sandbox stop [label]
+export default {
+  name: "sandbox stop", description: "Stop a container", help: `# /sandbox stop [label]
 
 Stop a running container. Uses the active container if no label is specified.
 
