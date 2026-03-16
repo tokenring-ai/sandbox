@@ -24,7 +24,7 @@ export default {
         chatService.addTools(tools)
       );
       app.waitForService(AgentCommandService, agentCommandService =>
-        agentCommandService.addAgentCommands(agentCommands)
+        agentCommandService.addAgentCommands([...agentCommands])
       );
 
       const sandboxService = new SandboxService(config.sandbox);

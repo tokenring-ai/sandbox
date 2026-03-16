@@ -1,25 +1,34 @@
-import Agent from "@tokenring-ai/agent/Agent";
+import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import SandboxService from "../../../SandboxService.ts";
 
-async function execute(remainder: string, agent: Agent): Promise<string> {
-  const sandbox = agent.requireServiceByType(SandboxService);
-  const providerName = remainder.trim();
-  if (!providerName) throw new CommandFailedError("Usage: /sandbox provider set <name>");
-  const available = sandbox.getAvailableProviders();
-  if (available.includes(providerName)) {
-    sandbox.setActiveProvider(providerName, agent);
-    return `Provider set to: ${providerName}`;
-  }
-  return `Provider "${providerName}" not found. Available providers: ${available.join(", ")}`;
-}
+const inputSchema = {
+  args: {},
+  positionals: [{
+    name: "providerName",
+    description: "Provider name",
+    required: true,
+  }],
+  allowAttachments: false,
+} as const satisfies AgentCommandInputSchema;
 
 export default {
-  name: "sandbox provider set", description: "Set the active provider", help: `# /sandbox provider set <name>
-
-Set the active sandbox provider by name.
+  name: "sandbox provider set",
+  description: "Set the active provider",
+  help: `Set the active sandbox provider by name.
 
 ## Example
 
-/sandbox provider set docker`, execute } satisfies TokenRingAgentCommand;
+/sandbox provider set docker`,
+  inputSchema,
+  execute: async ({positionals: { providerName }, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> => {
+    const sandbox = agent.requireServiceByType(SandboxService);
+
+    const available = sandbox.getAvailableProviders();
+    if (available.includes(providerName)) {
+      sandbox.setActiveProvider(providerName, agent);
+      return `Provider set to: ${providerName}`;
+    }
+    return `Provider "${providerName}" not found. Available providers: ${available.join(", ")}`;
+  },
+} satisfies TokenRingAgentCommand<typeof inputSchema>;
