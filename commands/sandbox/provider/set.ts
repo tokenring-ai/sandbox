@@ -1,5 +1,4 @@
 import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
-import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import SandboxService from "../../../SandboxService.ts";
 
 const inputSchema = {
@@ -8,8 +7,7 @@ const inputSchema = {
     name: "providerName",
     description: "Provider name",
     required: true,
-  }],
-  allowAttachments: false,
+  }]
 } as const satisfies AgentCommandInputSchema;
 
 export default {
