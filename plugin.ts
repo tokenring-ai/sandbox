@@ -4,7 +4,7 @@ import {ChatService} from "@tokenring-ai/chat";
 import {DockerSandboxProvider} from "@tokenring-ai/docker";
 import {z} from "zod";
 import agentCommands from "./commands.ts";
-import packageJSON from './package.json' with {type: 'json'};
+import packageJSON from "./package.json" with {type: "json"};
 import SandboxService from "./SandboxService.ts";
 import {SandboxServiceConfigSchema} from "./schema.ts";
 import tools from "./tools.ts";

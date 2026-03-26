@@ -15,7 +15,7 @@ export class SandboxState extends AgentStateSlice<typeof serializationSchema> {
   labelToContainerId: Map<string, string> = new Map();
 
   constructor(readonly initialConfig: z.output<typeof SandboxAgentConfigSchema>) {
-    super("SandboxState",serializationSchema);
+    super("SandboxState", serializationSchema);
     this.provider = initialConfig.provider ?? null;
   }
 

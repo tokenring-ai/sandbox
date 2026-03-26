@@ -1,7 +1,7 @@
 import Agent from "@tokenring-ai/agent/Agent";
 import {TokenRingToolDefinition, type TokenRingToolJSONResult} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
-import SandboxService from "../SandboxService.js";
+import SandboxService from "../SandboxService.ts";
 
 const name = "sandbox_removeContainer";
 const displayName = "Sandbox/removeContainer";

@@ -11,12 +11,6 @@ Key features include:
 - Agent state management with persistence and transfer capabilities
 - Label-based container referencing for easier management
 
-## Installation
-
-```bash
-bun add @tokenring-ai/sandbox
-```
-
 ## Package Structure
 
 ```
@@ -52,6 +46,12 @@ pkg/sandbox/
 ├── package.json
 ├── LICENSE
 └── README.md
+```
+
+## Installation
+
+```bash
+bun add @tokenring-ai/sandbox
 ```
 
 ## Core Components
@@ -158,17 +158,17 @@ The `SandboxService` manages multiple providers and tracks the active container 
 
 The `SandboxState` class manages agent state for sandbox operations, implementing `AgentStateSlice`.
 
-**State Properties:**
+**State Properties**:
 
 - `provider: string | null` - Current active provider name
 - `activeContainer: string | null` - Current active container label
 - `labelToContainerId: Map<string, string>` - Maps labels to container IDs
-- `initialConfig: z.output<typeof SandboxAgentConfigSchema>` - Initial configuration
+- `initialConfig: z.output<typeof SandboxAgentConfigSchema>` - Initial configuration (from service options)
 
-**State Methods:**
+**State Methods**:
 
 - `constructor(initialConfig: z.output<typeof SandboxAgentConfigSchema>)`
-  - Initializes state with provider from config or null
+  - Initializes state with provider from initialConfig or null
 
 - `transferStateFromParent(parent: Agent): void`
   - Transfers state from a parent agent (for agent teams)
@@ -205,7 +205,7 @@ Tools are agent-executable functions that wrap service methods, providing loggin
 ```typescript
 // sandbox_createContainer
 z.object({
-  label: z.string().describe("Label for the container"),
+  label: z.string().describe("Label for the container (required)"),
   image: z.string().optional().describe("Container image to use"),
   workingDir: z.string().optional().describe("Working directory in container"),
   environment: z.record(z.string(), z.string()).optional().describe("Environment variables"),
@@ -236,9 +236,9 @@ z.object({
 
 **Tool Behavior:**
 
-- **sandbox_createContainer**: Creates a container and automatically sets it as the active container. The returned `containerId` is the label (if provided) or the actual container ID from the provider.
+- **sandbox_createContainer**: Creates a container with the specified label and automatically sets it as the active container. The returned `containerId` is the label provided. All parameters except `label` are optional.
 
-- **sandbox_executeCommand**: Throws an error if no label is specified and no active container exists. Logs command execution and exit code.
+- **sandbox_executeCommand**: Throws an error if no label is specified and no active container exists. Logs command execution and exit code. Non-zero exit codes are logged as errors but the tool still returns the result.
 
 - **sandbox_stopContainer**: Throws an error if no label is specified and no active container exists. Clears the active container state after stopping.
 
@@ -260,7 +260,7 @@ The `/sandbox` command provides interactive control in agent chats.
 
 | Action | Description |
 |--------|-------------|
-| `create <label> [image]` | Create a new container with label and optional image |
+| `create <label> [image]` | Create a new container with required label and optional image |
 | `exec <command>` | Execute command in active container (requires active container) |
 | `stop [label]` | Stop container (uses active if unspecified, requires container) |
 | `logs [label]` | Get container logs (uses active if unspecified, requires container) |
@@ -392,7 +392,7 @@ The package throws errors in various scenarios:
   [sandbox_executeCommand] No container specified and no active container
   ```
 
-- **Command Failed**: When a command executes with a non-zero exit code, the tool returns the exit code but does not throw. The error is logged via `agent.errorMessage()`.
+- **Command Failed (Tool)**: When a command executes with a non-zero exit code, the tool logs the error via `agent.errorMessage()` but still returns the result with the exit code. The tool does not throw an exception.
 
 - **Provider Not Found**: When attempting to set a provider that is not registered
   ```
@@ -405,6 +405,11 @@ The package throws errors in various scenarios:
   ```
 
 - **Command Failed (Chat Command)**: Chat commands throw `CommandFailedError` with usage information when required arguments are missing.
+
+- **Unknown Provider Type**: When configuring a provider type that is not implemented in `plugin.ts`
+  ```
+  Unknown sandbox provider type: <type>
+  ```
 
 ## Usage Examples
 
@@ -435,8 +440,9 @@ app.install(sandboxPlugin, {
 ### Using the Service Directly
 
 ```typescript
-import { SandboxService } from "@tokenring-ai/sandbox";
+import SandboxService from "@tokenring-ai/sandbox/SandboxService.ts";
 import { DockerSandboxProvider } from "@tokenring-ai/docker";
+import Agent from "@tokenring-ai/agent";
 
 const sandboxService = new SandboxService({
   providers: {},
@@ -446,15 +452,18 @@ const sandboxService = new SandboxService({
 // Register a provider
 sandboxService.registerProvider('docker', new DockerSandboxProvider());
 
+// Attach to an agent (initializes state)
+sandboxService.attach(agent);
+
 // Create and use container
-const result = await sandboxService.createContainer({ 
+const result = await sandboxService.createContainer({
   label: 'myapp',
-  image: 'ubuntu:latest' 
+  image: 'ubuntu:latest'
 }, agent);
 console.log(`Created: ${result.containerId}`);
 
 const execResult = await sandboxService.executeCommand(
-  result.containerId, 
+  result.containerId,
   'ls -la',
   agent
 );
@@ -465,18 +474,24 @@ console.log(`Stdout: ${execResult.stdout}`);
 
 ```typescript
 // Agent invokes tool
-await agent.executeTool('sandbox_createContainer', { 
+await agent.executeTool('sandbox_createContainer', {
   label: 'myapp',
-  image: 'node:18' 
+  image: 'node:18'
 });
-await agent.executeTool('sandbox_executeCommand', { 
+// After container is created, it becomes the active container
+await agent.executeTool('sandbox_executeCommand', {
   command: 'node --version'
+});
+// Or specify a specific container label
+await agent.executeTool('sandbox_executeCommand', {
+  label: 'myapp',
+  command: 'ls -la'
 });
 ```
 
 ### Provider Configuration
 
-The plugin supports configuring multiple sandbox providers at installation time:
+The plugin supports configuring sandbox providers at installation time. Currently, only the `docker` provider type is implemented:
 
 ```typescript
 app.install(sandboxPlugin, {
@@ -484,11 +499,7 @@ app.install(sandboxPlugin, {
     providers: {
       docker: {
         type: "docker",
-        // Docker-specific configuration
-      },
-      kubernetes: {
-        type: "kubernetes",
-        // Kubernetes-specific configuration
+        // Docker-specific configuration (passed to DockerSandboxProvider)
       }
     },
     agentDefaults: {
@@ -497,6 +508,10 @@ app.install(sandboxPlugin, {
   }
 });
 ```
+
+**Note**: The plugin currently only supports the `docker` provider type. Attempting to configure other provider types will result in an error: `Unknown sandbox provider type: <type>`
+
+**Adding new provider types**: To add support for new provider types, modify the switch statement in `plugin.ts` and implement the corresponding provider class.
 
 ## Configuration Options
 
@@ -515,7 +530,11 @@ The plugin accepts a configuration with the following structure:
 }
 ```
 
-### SandboxServiceConfigSchema
+### Schema Exports
+
+The `schema.ts` file exports the following schemas:
+
+#### SandboxServiceConfigSchema
 
 ```typescript
 z.object({
@@ -526,13 +545,17 @@ z.object({
 });
 ```
 
-### SandboxAgentConfigSchema
+This schema defines the plugin configuration structure. The `providers` field is optional and allows configuring multiple sandbox providers at installation time. The `agentDefaults` field is required and specifies the default provider for new agents.
+
+#### SandboxAgentConfigSchema
 
 ```typescript
 z.object({
   provider: z.string().optional()
 }).default({})
 ```
+
+The `SandboxAgentConfigSchema` defines the per-agent configuration. The `provider` field is optional and allows each agent to have its own active provider setting, which defaults to null if not specified.
 
 ### SandboxOptions
 
@@ -543,6 +566,18 @@ z.object({
 | `workingDir` | `string` | Working directory in container |
 | `environment` | `Record<string, string>` | Environment variables |
 | `timeout` | `number` | Timeout in seconds for operations |
+
+## Best Practices
+
+- **Always specify a label when creating containers**: Labels provide a consistent way to reference containers across sessions.
+
+- **Check for active container before operations**: Before executing commands, stopping, or removing containers, verify that an active container exists or specify a label explicitly.
+
+- **Use the active container pattern**: After creating a container, it becomes the active container. Subsequent operations without a label will use the active container.
+
+- **Handle provider selection carefully**: When multiple providers are configured, use `/sandbox provider select` for interactive selection or `/sandbox provider set <name>` for programmatic selection.
+
+- **Clean up unused containers**: Regularly remove unused containers to free up resources using `/sandbox remove` or `sandbox_removeContainer` tool.
 
 ## Development
 
@@ -558,7 +593,7 @@ bun run build
 bun run test
 ```
 
-Note: The package currently uses vitest for testing but does not include test files. Tests can be added by creating `*.test.ts` files in the package directory.
+The package uses vitest for testing. Test files should be named `*.test.ts` and placed in the package directory.
 
 ### Extending
 
@@ -567,9 +602,20 @@ To add new sandbox providers:
 1. Create a class that implements `SandboxProvider` interface
 2. Implement all required methods
 3. Register the provider with `SandboxService.registerProvider()`
-4. Add provider type handling in `plugin.ts` if using plugin registration
+4. Add provider type handling in `plugin.ts` if using plugin registration (switch statement)
 
-Example:
+**Adding a new provider type to the plugin**:
+
+To add support for a new provider type (e.g., `kubernetes`), modify the `plugin.ts` file:
+
+```typescript
+// In plugin.ts, add to the switch statement
+case "kubernetes":
+  sandboxService.registerProvider(name, new KubernetesSandboxProvider(sandboxConfig));
+  break;
+```
+
+Example provider implementation:
 
 ```typescript
 import { SandboxProvider, SandboxOptions, SandboxResult, ExecuteResult, LogsResult } from "@tokenring-ai/sandbox";
@@ -609,6 +655,8 @@ export { SandboxService } from "./SandboxService.ts";
 export type { SandboxProvider } from "./SandboxProvider.ts";
 ```
 
+Note: `SandboxService` is exported as the default export from `SandboxService.ts`, so it's imported as `import SandboxService from "./SandboxService.ts"` when used directly.
+
 ### Plugin Export
 
 ```typescript
@@ -638,8 +686,8 @@ export default {
 
 ### Development Dependencies
 
-- `vitest`: ^4.1.0
-- `typescript`: ^5.9.3
+- `vitest`: ^4.1.1
+- `typescript`: ^6.0.2
 
 ## License
 
