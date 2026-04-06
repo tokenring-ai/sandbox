@@ -5,7 +5,6 @@ export const SandboxAgentConfigSchema = z.object({
 }).default({});
 
 export const SandboxServiceConfigSchema = z.object({
-  providers: z.record(z.string(), z.any()).optional(),
   agentDefaults: z.object({
     provider: z.string()
   })
