@@ -1,5 +1,5 @@
-import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition, type TokenRingToolJSONResult} from "@tokenring-ai/chat/schema";
+import type Agent from "@tokenring-ai/agent/Agent";
+import type {TokenRingToolDefinition, TokenRingToolJSONResult,} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import SandboxService from "../SandboxService.ts";
 
@@ -12,38 +12,51 @@ async function execute(
     image,
     workingDir,
     environment,
-    timeout
+    timeout,
   }: z.output<typeof inputSchema>,
   agent: Agent,
 ): Promise<TokenRingToolJSONResult<{ containerId: string; status: string }>> {
   const sandbox = agent.requireServiceByType(SandboxService);
 
-  agent.infoMessage(`[${name}] Creating container '${label}'${image ? ` with image: ${image}` : ""}`);
-  const result = await sandbox.createContainer({
-    label,
-    image,
-    workingDir,
-    environment,
-    timeout
-  }, agent);
+  agent.infoMessage(
+    `[${name}] Creating container '${label}'${image ? ` with image: ${image}` : ""}`,
+  );
+  const result = await sandbox.createContainer(
+    {
+      label,
+      image,
+      workingDir,
+      environment,
+      timeout,
+    },
+    agent,
+  );
 
   agent.infoMessage(`[${name}] Container created: ${result.containerId}`);
   return {
     type: "json",
-    data: result
+    data: result,
   };
 }
 
-const description = "Create a new sandbox container using the active sandbox provider";
+const description =
+  "Create a new sandbox container using the active sandbox provider";
 
 const inputSchema = z.object({
   label: z.string().describe("Label for the container"),
   image: z.string().optional().describe("Container image to use"),
   workingDir: z.string().optional().describe("Working directory in container"),
-  environment: z.record(z.string(), z.string()).optional().describe("Environment variables"),
+  environment: z
+    .record(z.string(), z.string())
+    .optional()
+    .describe("Environment variables"),
   timeout: z.number().optional().describe("Timeout in seconds"),
 });
 
 export default {
-  name, displayName, description, inputSchema, execute,
+  name,
+  displayName,
+  description,
+  inputSchema,
+  execute,
 } satisfies TokenRingToolDefinition<typeof inputSchema>;

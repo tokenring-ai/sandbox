@@ -1,3 +1,5 @@
+import type {MaybePromise} from "bun";
+
 export interface SandboxOptions {
   label?: string;
   image?: string;
@@ -22,13 +24,13 @@ export interface LogsResult {
 }
 
 export interface SandboxProvider {
-  createContainer(options?: SandboxOptions): Promise<SandboxResult>;
+  createContainer(options?: SandboxOptions): MaybePromise<SandboxResult>;
 
-  executeCommand(containerId: string, command: string): Promise<ExecuteResult>;
+  executeCommand(containerId: string, command: string): MaybePromise<ExecuteResult>;
 
-  stopContainer(containerId: string): Promise<void>;
+  stopContainer(containerId: string): MaybePromise<void>;
 
-  getLogs(containerId: string): Promise<LogsResult>;
+  getLogs(containerId: string): MaybePromise<LogsResult>;
 
-  removeContainer(containerId: string): Promise<void>;
+  removeContainer(containerId: string): MaybePromise<void>;
 }

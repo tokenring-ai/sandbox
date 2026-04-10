@@ -1,12 +1,12 @@
-import {Agent} from "@tokenring-ai/agent";
+import type {Agent} from "@tokenring-ai/agent";
 import {AgentStateSlice} from "@tokenring-ai/agent/types";
 import {z} from "zod";
-import {SandboxAgentConfigSchema} from "../schema.ts";
+import type {SandboxAgentConfigSchema} from "../schema.ts";
 
 const serializationSchema = z.object({
   provider: z.string().nullable(),
   activeContainer: z.string().nullable(),
-  labelToContainerId: z.array(z.tuple([z.string(), z.string()]))
+  labelToContainerId: z.array(z.tuple([z.string(), z.string()])),
 });
 
 export class SandboxState extends AgentStateSlice<typeof serializationSchema> {
@@ -14,7 +14,9 @@ export class SandboxState extends AgentStateSlice<typeof serializationSchema> {
   activeContainer: string | null = null;
   labelToContainerId: Map<string, string> = new Map();
 
-  constructor(readonly initialConfig: z.output<typeof SandboxAgentConfigSchema>) {
+  constructor(
+    readonly initialConfig: z.output<typeof SandboxAgentConfigSchema>,
+  ) {
     super("SandboxState", serializationSchema);
     this.provider = initialConfig.provider ?? null;
   }
@@ -40,10 +42,8 @@ export class SandboxState extends AgentStateSlice<typeof serializationSchema> {
     this.labelToContainerId = new Map(data.labelToContainerId);
   }
 
-  show(): string[] {
-    return [
-      `Active Provider: ${this.provider}`,
-      `Active Container: ${this.activeContainer ?? "(none)"}`,
-    ];
+  show(): string {
+    return `Active Provider: ${this.provider}
+Active Container: ${this.activeContainer ?? "(none)"}`;
   }
 }

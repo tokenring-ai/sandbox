@@ -1,5 +1,5 @@
-import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition, type TokenRingToolJSONResult} from "@tokenring-ai/chat/schema";
+import type Agent from "@tokenring-ai/agent/Agent";
+import type {TokenRingToolDefinition, TokenRingToolJSONResult,} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import SandboxService from "../SandboxService.ts";
 
@@ -7,9 +7,7 @@ const name = "sandbox_stopContainer";
 const displayName = "Sandbox/stopContainer";
 
 async function execute(
-  {
-    label
-  }: z.output<typeof inputSchema>,
+  {label}: z.output<typeof inputSchema>,
   agent: Agent,
 ): Promise<TokenRingToolJSONResult<{ success: boolean }>> {
   const sandbox = agent.requireServiceByType(SandboxService);
@@ -24,16 +22,23 @@ async function execute(
 
   return {
     type: "json",
-    data: {success: true}
+    data: {success: true},
   };
 }
 
 const description = "Stop a sandbox container";
 
 const inputSchema = z.object({
-  label: z.string().optional().describe("Container label (uses active container if not specified)"),
+  label: z
+    .string()
+    .optional()
+    .describe("Container label (uses active container if not specified)"),
 });
 
 export default {
-  name, displayName, description, inputSchema, execute,
+  name,
+  displayName,
+  description,
+  inputSchema,
+  execute,
 } satisfies TokenRingToolDefinition<typeof inputSchema>;

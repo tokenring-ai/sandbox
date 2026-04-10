@@ -1,4 +1,4 @@
-import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand,} from "@tokenring-ai/agent/types";
 import SandboxService from "../../SandboxService.ts";
 
 const inputSchema = {
@@ -14,7 +14,7 @@ const inputSchema = {
       description: "Optional container image",
       required: false,
     },
-  ]
+  ],
 } as const satisfies AgentCommandInputSchema;
 
 export default {
@@ -27,8 +27,13 @@ export default {
 /sandbox create myapp
 /sandbox create myapp ubuntu:22.04`,
   inputSchema,
-  execute: async ({positionals: { label, image }, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> => {
-    const result = await agent.requireServiceByType(SandboxService).createContainer({label, image}, agent);
+  execute: async ({
+                    positionals: {label, image},
+                    agent,
+                  }: AgentCommandInputType<typeof inputSchema>): Promise<string> => {
+    const result = await agent
+      .requireServiceByType(SandboxService)
+      .createContainer({label, image}, agent);
     return `Container created: ${result.containerId} (${result.status})`;
   },
 } satisfies TokenRingAgentCommand<typeof inputSchema>;
