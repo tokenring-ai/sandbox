@@ -1,5 +1,5 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition, TokenRingToolJSONResult,} from "@tokenring-ai/chat/schema";
+import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import SandboxService from "../SandboxService.ts";
 
@@ -15,7 +15,7 @@ async function execute(
     timeout,
   }: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<TokenRingToolJSONResult<{ containerId: string; status: string }>> {
+): Promise<TokenRingToolResult> {
   const sandbox = agent.requireServiceByType(SandboxService);
 
   agent.infoMessage(
@@ -34,8 +34,8 @@ async function execute(
 
   agent.infoMessage(`[${name}] Container created: ${result.containerId}`);
   return {
-    type: "json",
-    data: result,
+    summary: `Created sandbox container: ${result.containerId}`,
+    result: JSON.stringify(result),
   };
 }
 

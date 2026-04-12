@@ -1,5 +1,5 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition, TokenRingToolJSONResult,} from "@tokenring-ai/chat/schema";
+import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import SandboxService from "../SandboxService.ts";
 
@@ -9,7 +9,7 @@ const displayName = "Sandbox/getLogs";
 async function execute(
   {label}: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<TokenRingToolJSONResult<{ logs: string }>> {
+): Promise<TokenRingToolResult> {
   const sandbox = agent.requireServiceByType(SandboxService);
 
   const targetLabel = label || sandbox.getActiveContainer(agent);
@@ -20,8 +20,8 @@ async function execute(
   agent.infoMessage(`[${name}] Getting logs for container: '${targetLabel}'`);
   const result = await sandbox.getLogs(targetLabel, agent);
   return {
-    type: "json",
-    data: result,
+    summary: `Retrieved logs from container ${targetLabel}`,
+    result: JSON.stringify(result),
   };
 }
 

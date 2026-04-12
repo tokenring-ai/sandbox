@@ -5,6 +5,7 @@
 The `@tokenring-ai/sandbox` package provides an abstract interface for managing sandboxed environments within the Token Ring AI agent system. It enables the creation, execution, and management of isolated containers (e.g., via Docker or similar providers) to safely run commands or code. The package acts as a service layer that abstracts provider-specific details, allowing multiple sandbox providers to be registered and switched dynamically.
 
 Key features include:
+
 - Abstract provider interface for extensibility (e.g., Docker, Kubernetes)
 - Service management for active providers and containers with label-to-container ID mapping
 - Integration with Token Ring agents via tools and chat commands
@@ -289,6 +290,7 @@ The `/sandbox` command provides interactive control in agent chats.
 Create a new sandbox container with an optional image.
 
 **Example:**
+
 ```bash
 /sandbox create myapp
 /sandbox create myapp ubuntu:22.04
@@ -299,6 +301,7 @@ Create a new sandbox container with an optional image.
 Execute a command in the active container. Requires an active container to exist.
 
 **Example:**
+
 ```bash
 /sandbox exec ls -la /app
 ```
@@ -308,6 +311,7 @@ Execute a command in the active container. Requires an active container to exist
 Stop a running container. Uses the active container if no label is specified.
 
 **Example:**
+
 ```bash
 /sandbox stop
 /sandbox stop myapp
@@ -318,6 +322,7 @@ Stop a running container. Uses the active container if no label is specified.
 Retrieve logs from a container. Uses the active container if no label is specified.
 
 **Example:**
+
 ```bash
 /sandbox logs
 /sandbox logs myapp
@@ -328,6 +333,7 @@ Retrieve logs from a container. Uses the active container if no label is specifi
 Remove a container. Uses the active container if no label is specified.
 
 **Example:**
+
 ```bash
 /sandbox remove
 /sandbox remove myapp
@@ -338,6 +344,7 @@ Remove a container. Uses the active container if no label is specified.
 Show the current sandbox status including active container and provider.
 
 **Example:**
+
 ```bash
 /sandbox status
 ```
@@ -347,6 +354,7 @@ Show the current sandbox status including active container and provider.
 Display the currently active sandbox provider.
 
 **Example:**
+
 ```bash
 /sandbox provider get
 ```
@@ -356,6 +364,7 @@ Display the currently active sandbox provider.
 Set the active sandbox provider by name.
 
 **Example:**
+
 ```bash
 /sandbox provider set docker
 ```
@@ -365,6 +374,7 @@ Set the active sandbox provider by name.
 Reset the active sandbox provider to the initial configured value.
 
 **Example:**
+
 ```bash
 /sandbox provider reset
 ```
@@ -374,6 +384,7 @@ Reset the active sandbox provider to the initial configured value.
 Interactively select the active sandbox provider. Auto-selects if only one provider is configured.
 
 **Example:**
+
 ```bash
 /sandbox provider select
 ```
@@ -383,11 +394,13 @@ Interactively select the active sandbox provider. Auto-selects if only one provi
 The package throws errors in various scenarios:
 
 - **No Active Provider**: When attempting to perform operations without an active provider set
+
   ```
   [SandboxService] No active provider set
   ```
 
 - **No Container Specified**: When a tool or command requires a container but none is specified and no active container exists
+
   ```
   [sandbox_executeCommand] No container specified and no active container
   ```
@@ -395,11 +408,13 @@ The package throws errors in various scenarios:
 - **Command Failed (Tool)**: When a command executes with a non-zero exit code, the tool logs the error via `agent.errorMessage()` but still returns the result with the exit code. The tool does not throw an exception.
 
 - **Provider Not Found**: When attempting to set a provider that is not registered
+
   ```
   Provider "docker" not found. Available providers: kubernetes
   ```
 
 - **No Initial Provider**: When attempting to reset to an initial provider that was not configured
+
   ```
   No initial provider configured
   ```
@@ -407,6 +422,7 @@ The package throws errors in various scenarios:
 - **Command Failed (Chat Command)**: Chat commands throw `CommandFailedError` with usage information when required arguments are missing.
 
 - **Unknown Provider Type**: When configuring a provider type that is not implemented in `plugin.ts`
+
   ```
   Unknown sandbox provider type: <type>
   ```

@@ -1,5 +1,5 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition, TokenRingToolJSONResult,} from "@tokenring-ai/chat/schema";
+import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import SandboxService from "../SandboxService.ts";
 
@@ -10,7 +10,7 @@ async function execute(
   {label, command}: z.output<typeof inputSchema>,
   agent: Agent,
 ): Promise<
-  TokenRingToolJSONResult<{ stdout: string; stderr: string; exitCode: number }>
+  TokenRingToolResult
 > {
   const sandbox = agent.requireServiceByType(SandboxService);
 
@@ -29,8 +29,8 @@ async function execute(
   }
 
   return {
-    type: "json",
-    data: result,
+    summary: `Executed command in container ${targetLabel}`,
+    result: JSON.stringify(result),
   };
 }
 
