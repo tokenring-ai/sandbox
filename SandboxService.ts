@@ -14,8 +14,8 @@ export default class SandboxService implements TokenRingService {
 
   private providerRegistry = new KeyedRegistry<SandboxProvider>();
 
-  registerProvider = this.providerRegistry.register;
-  getAvailableProviders = this.providerRegistry.getAllItemNames;
+  registerProvider = this.providerRegistry.set;
+  getAvailableProviders = this.providerRegistry.keysArray;
 
   constructor(readonly options: z.output<typeof SandboxServiceConfigSchema>) {
   }
@@ -37,7 +37,7 @@ export default class SandboxService implements TokenRingService {
   getActiveProvider(agent: Agent): SandboxProvider | null {
     const providerName = agent.getState(SandboxState).provider;
     if (!providerName) return null;
-    return this.providerRegistry.requireItemByName(providerName);
+    return this.providerRegistry.require(providerName);
   }
 
   setActiveProvider(name: string, agent: Agent): void {
