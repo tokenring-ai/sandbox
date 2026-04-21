@@ -1,4 +1,4 @@
-import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import type { AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand } from "@tokenring-ai/agent/types";
 import SandboxService from "../../../SandboxService.ts";
 
 const inputSchema = {
@@ -21,10 +21,7 @@ export default {
 
 /sandbox provider set docker`,
   inputSchema,
-  execute: ({
-              positionals: {providerName},
-              agent,
-            }: AgentCommandInputType<typeof inputSchema>): string => {
+  execute: ({ positionals: { providerName }, agent }: AgentCommandInputType<typeof inputSchema>): string => {
     const sandbox = agent.requireServiceByType(SandboxService);
 
     const available = sandbox.getAvailableProviders();

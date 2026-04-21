@@ -1,8 +1,8 @@
-import {z} from "zod";
+import { z } from "zod";
 
 export const SandboxAgentConfigSchema = z
   .object({
-    provider: z.string().optional(),
+    provider: z.string().exactOptional(),
   })
   .default({});
 

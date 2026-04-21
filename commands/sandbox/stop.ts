@@ -1,5 +1,5 @@
-import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
-import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import { CommandFailedError } from "@tokenring-ai/agent/AgentError";
+import type { AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand } from "@tokenring-ai/agent/types";
 import SandboxService from "../../SandboxService.ts";
 
 const inputSchema = {
@@ -23,16 +23,10 @@ export default {
 /sandbox stop
 /sandbox stop myapp`,
   inputSchema,
-  execute: async ({
-                    positionals,
-                    agent,
-                  }: AgentCommandInputType<typeof inputSchema>): Promise<string> => {
+  execute: async ({ positionals, agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> => {
     const sandbox = agent.requireServiceByType(SandboxService);
     const label = positionals.label || sandbox.getActiveContainer(agent);
-    if (!label)
-      throw new CommandFailedError(
-        "No container specified and no active container",
-      );
+    if (!label) throw new CommandFailedError("No container specified and no active container");
     await sandbox.stopContainer(label, agent);
     return `Container stopped: ${label}`;
   },

@@ -1,26 +1,15 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
-import {z} from "zod";
+import type { TokenRingToolDefinition, TokenRingToolResult } from "@tokenring-ai/chat/schema";
+import { z } from "zod";
 import SandboxService from "../SandboxService.ts";
 
 const name = "sandbox_createContainer";
 const displayName = "Sandbox/createContainer";
 
-async function execute(
-  {
-    label,
-    image,
-    workingDir,
-    environment,
-    timeout,
-  }: z.output<typeof inputSchema>,
-  agent: Agent,
-): Promise<TokenRingToolResult> {
+async function execute({ label, image, workingDir, environment, timeout }: z.output<typeof inputSchema>, agent: Agent): Promise<TokenRingToolResult> {
   const sandbox = agent.requireServiceByType(SandboxService);
 
-  agent.infoMessage(
-    `[${name}] Creating container '${label}'${image ? ` with image: ${image}` : ""}`,
-  );
+  agent.infoMessage(`[${name}] Creating container '${label}'${image ? ` with image: ${image}` : ""}`);
   const result = await sandbox.createContainer(
     {
       label,
@@ -39,18 +28,14 @@ async function execute(
   };
 }
 
-const description =
-  "Create a new sandbox container using the active sandbox provider";
+const description = "Create a new sandbox container using the active sandbox provider";
 
 const inputSchema = z.object({
   label: z.string().describe("Label for the container"),
-  image: z.string().optional().describe("Container image to use"),
-  workingDir: z.string().optional().describe("Working directory in container"),
-  environment: z
-    .record(z.string(), z.string())
-    .optional()
-    .describe("Environment variables"),
-  timeout: z.number().optional().describe("Timeout in seconds"),
+  image: z.string().exactOptional().describe("Container image to use"),
+  workingDir: z.string().exactOptional().describe("Working directory in container"),
+  environment: z.record(z.string(), z.string()).exactOptional().describe("Environment variables"),
+  timeout: z.number().exactOptional().describe("Timeout in seconds"),
 });
 
 export default {

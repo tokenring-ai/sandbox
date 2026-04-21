@@ -1,11 +1,11 @@
-import type {MaybePromise} from "bun";
+import type { MaybePromise } from "bun";
 
 export interface SandboxOptions {
-  label?: string;
-  image?: string;
-  workingDir?: string;
-  environment?: Record<string, string>;
-  timeout?: number;
+  label?: string | undefined;
+  image?: string | undefined;
+  workingDir?: string | undefined;
+  environment?: Record<string, string> | undefined;
+  timeout?: number | undefined;
 }
 
 export interface SandboxResult {

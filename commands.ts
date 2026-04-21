@@ -9,15 +9,4 @@ import remove from "./commands/sandbox/remove.ts";
 import status from "./commands/sandbox/status.ts";
 import stop from "./commands/sandbox/stop.ts";
 
-export default [
-  create,
-  exec,
-  stop,
-  logs,
-  remove,
-  status,
-  providerGet,
-  providerSet,
-  providerSelect,
-  providerReset,
-];
+export default [create, exec, stop, logs, remove, status, providerGet, providerSet, providerSelect, providerReset];

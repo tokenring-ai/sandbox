@@ -1,15 +1,12 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
-import {z} from "zod";
+import type { TokenRingToolDefinition, TokenRingToolResult } from "@tokenring-ai/chat/schema";
+import { z } from "zod";
 import SandboxService from "../SandboxService.ts";
 
 const name = "sandbox_getLogs";
 const displayName = "Sandbox/getLogs";
 
-async function execute(
-  {label}: z.output<typeof inputSchema>,
-  agent: Agent,
-): Promise<TokenRingToolResult> {
+async function execute({ label }: z.output<typeof inputSchema>, agent: Agent): Promise<TokenRingToolResult> {
   const sandbox = agent.requireServiceByType(SandboxService);
 
   const targetLabel = label || sandbox.getActiveContainer(agent);
@@ -28,10 +25,7 @@ async function execute(
 const description = "Get logs from a sandbox container";
 
 const inputSchema = z.object({
-  label: z
-    .string()
-    .optional()
-    .describe("Container label (uses active container if not specified)"),
+  label: z.string().exactOptional().describe("Container label (uses active container if not specified)"),
 });
 
 export default {

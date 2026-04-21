@@ -1,5 +1,5 @@
-import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
-import {SandboxState} from "../../state/SandboxState.ts";
+import type { AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand } from "@tokenring-ai/agent/types";
+import { SandboxState } from "../../state/SandboxState.ts";
 
 const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
@@ -12,9 +12,7 @@ export default {
 
 /sandbox status`,
   inputSchema,
-  execute: ({
-              agent,
-            }: AgentCommandInputType<typeof inputSchema>): string => {
+  execute: ({ agent }: AgentCommandInputType<typeof inputSchema>): string => {
     const state = agent.getState(SandboxState);
     return `Active container: ${state.activeContainer || "none"}\nActive provider: ${state.provider || "none"}`;
   },

@@ -1,5 +1,5 @@
-import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
-import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import { CommandFailedError } from "@tokenring-ai/agent/AgentError";
+import type { AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand } from "@tokenring-ai/agent/types";
 import SandboxService from "../../SandboxService.ts";
 
 const inputSchema = {
@@ -20,17 +20,11 @@ export default {
 
 /sandbox exec ls -la /app`,
   inputSchema,
-  execute: async ({
-                    remainder,
-                    agent,
-                  }: AgentCommandInputType<typeof inputSchema>): Promise<string> => {
+  execute: async ({ remainder, agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> => {
     const sandbox = agent.requireServiceByType(SandboxService);
 
     const active = sandbox.getActiveContainer(agent);
-    if (!active)
-      throw new CommandFailedError(
-        "No active container. Create one first with /sandbox create",
-      );
+    if (!active) throw new CommandFailedError("No active container. Create one first with /sandbox create");
     const result = await sandbox.executeCommand(active, remainder, agent);
     const lines: string[] = [];
     if (result.stdout) lines.push(`stdout: ${result.stdout}`);
