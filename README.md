@@ -2,7 +2,10 @@
 
 ## Overview
 
-The `@tokenring-ai/sandbox` package provides an abstract interface for managing sandboxed environments within the Token Ring AI agent system. It enables the creation, execution, and management of isolated containers (e.g., via Docker or similar providers) to safely run commands or code. The package acts as a service layer that abstracts provider-specific details, allowing multiple sandbox providers to be registered and switched dynamically.
+The `@tokenring-ai/sandbox` package provides an abstract interface for managing sandboxed environments within the Token
+Ring AI agent system. It enables the creation, execution, and management of isolated containers (e.g., via Docker or
+similar providers) to safely run commands or code. The package acts as a service layer that abstracts provider-specific
+details, allowing multiple sandbox providers to be registered and switched dynamically.
 
 Key features include:
 
@@ -59,16 +62,21 @@ bun add @tokenring-ai/sandbox
 
 ### SandboxProvider (Interface)
 
-The `SandboxProvider` interface defines the contract for any concrete sandbox implementation. It defines methods for container lifecycle and execution.
+The `SandboxProvider` interface defines the contract for any concrete sandbox implementation. It defines methods for
+container lifecycle and execution.
 
 **Interface Definition:**
 
 ```typescript
 interface SandboxProvider {
   createContainer(options?: SandboxOptions): Promise<SandboxResult>;
+
   executeCommand(containerId: string, command: string): Promise<ExecuteResult>;
+
   stopContainer(containerId: string): Promise<void>;
+
   getLogs(containerId: string): Promise<LogsResult>;
+
   removeContainer(containerId: string): Promise<void>;
 }
 ```
@@ -102,7 +110,8 @@ interface LogsResult {
 
 ### SandboxService
 
-The `SandboxService` manages multiple providers and tracks the active container with label-to-container ID mapping. It implements `TokenRingService` for integration with agents.
+The `SandboxService` manages multiple providers and tracks the active container with label-to-container ID mapping. It
+implements `TokenRingService` for integration with agents.
 
 **Service Methods:**
 
@@ -110,50 +119,50 @@ The `SandboxService` manages multiple providers and tracks the active container 
 - `readonly description: string` - Service description
 - `readonly options: z.output<typeof SandboxServiceConfigSchema>` - Service configuration options
 - `registerProvider: (name: string, resource: SandboxProvider) => void`
-  - Registers a provider in the internal registry using `KeyedRegistry`
+- Registers a provider in the internal registry using `KeyedRegistry`
 
 - `getAvailableProviders: () => string[]`
-  - Returns names of all registered providers
+- Returns names of all registered providers
 
 - `attach(agent: Agent): void`
-  - Attaches the service to an agent and initializes agent state with merged configuration
+- Attaches the service to an agent and initializes agent state with merged configuration
 
 - `requireActiveProvider(agent: Agent): SandboxProvider`
-  - Gets the active provider or throws an error if none is set
+- Gets the active provider or throws an error if none is set
 
 - `getActiveProvider(agent: Agent): SandboxProvider | null`
-  - Gets the active provider or returns null
+- Gets the active provider or returns null
 
 - `setActiveProvider(name: string, agent: Agent): void`
-  - Sets the active provider by name in agent state
+- Sets the active provider by name in agent state
 
 - `getActiveContainer(agent: Agent): string | null`
-  - Gets the active container label
+- Gets the active container label
 
 - `setActiveContainer(containerId: string, agent: Agent): void`
-  - Sets the active container label in agent state
+- Sets the active container label in agent state
 
 - `async createContainer(options: SandboxOptions | undefined, agent: Agent): Promise<SandboxResult>`
-  - Creates a container using the active provider
-  - Sets the created container as active with label mapping
-  - Returns `{ containerId: label, status }` where label is from options or the actual container ID
+- Creates a container using the active provider
+- Sets the created container as active with label mapping
+- Returns `{ containerId: label, status }` where label is from options or the actual container ID
 
 - `async executeCommand(label: string, command: string, agent: Agent): Promise<ExecuteResult>`
-  - Executes a command in the specified container
-  - Uses label-to-container ID mapping from state
-  - If label is not found in map, uses label as container ID directly
+- Executes a command in the specified container
+- Uses label-to-container ID mapping from state
+- If label is not found in map, uses label as container ID directly
 
 - `async stopContainer(label: string, agent: Agent): Promise<void>`
-  - Stops the specified container
-  - Clears active container if it matches the stopped container
+- Stops the specified container
+- Clears active container if it matches the stopped container
 
 - `async getLogs(label: string, agent: Agent): Promise<LogsResult>`
-  - Retrieves logs from the specified container
-  - Uses label-to-container ID mapping
+- Retrieves logs from the specified container
+- Uses label-to-container ID mapping
 
 - `async removeContainer(label: string, agent: Agent): Promise<void>`
-  - Removes the specified container and its label mapping
-  - Clears active container if it matches the removed container
+- Removes the specified container and its label mapping
+- Clears active container if it matches the removed container
 
 ### SandboxState
 
@@ -169,37 +178,38 @@ The `SandboxState` class manages agent state for sandbox operations, implementin
 **State Methods**:
 
 - `constructor(initialConfig: z.output<typeof SandboxAgentConfigSchema>)`
-  - Initializes state with provider from initialConfig or null
+- Initializes state with provider from initialConfig or null
 
 - `transferStateFromParent(parent: Agent): void`
-  - Transfers state from a parent agent (for agent teams)
-  - Copies provider, activeContainer, and labelToContainerId map
+- Transfers state from a parent agent (for agent teams)
+- Copies provider, activeContainer, and labelToContainerId map
 
 - `serialize(): z.output<typeof serializationSchema>`
-  - Serializes state for persistence
-  - Converts `labelToContainerId` Map to array of tuples
+- Serializes state for persistence
+- Converts `labelToContainerId` Map to array of tuples
 
 - `deserialize(data: z.output<typeof serializationSchema>): void`
-  - Deserializes persisted state
-  - Converts array of tuples back to Map
+- Deserializes persisted state
+- Converts array of tuples back to Map
 
 - `show(): string[]`
-  - Returns state summary strings for display
-  - Returns active provider and active container status
+- Returns state summary strings for display
+- Returns active provider and active container status
 
 ## Tools
 
-Tools are agent-executable functions that wrap service methods, providing logging and validation via Zod schemas. Exported from `tools.ts`.
+Tools are agent-executable functions that wrap service methods, providing logging and validation via Zod schemas.
+Exported from `tools.ts`.
 
 **Available Tools:**
 
-| Tool Name | Description |
-|-----------|-------------|
-| `sandbox_createContainer` | Creates a new sandbox container with optional parameters |
-| `sandbox_executeCommand` | Executes a command in a container (uses active if unspecified) |
-| `sandbox_stopContainer` | Stops a container (uses active if unspecified) |
-| `sandbox_getLogs` | Gets container logs (uses active if unspecified) |
-| `sandbox_removeContainer` | Removes a container (uses active if unspecified) |
+| Tool Name                 | Description                                                    |
+|---------------------------|----------------------------------------------------------------|
+| `sandbox_createContainer` | Creates a new sandbox container with optional parameters       |
+| `sandbox_executeCommand`  | Executes a command in a container (uses active if unspecified) |
+| `sandbox_stopContainer`   | Stops a container (uses active if unspecified)                 |
+| `sandbox_getLogs`         | Gets container logs (uses active if unspecified)               |
+| `sandbox_removeContainer` | Removes a container (uses active if unspecified)               |
 
 **Tool Input Schemas:**
 
@@ -237,15 +247,19 @@ z.object({
 
 **Tool Behavior:**
 
-- **sandbox_createContainer**: Creates a container with the specified label and automatically sets it as the active container. The returned `containerId` is the label provided. All parameters except `label` are optional.
+- **sandbox_createContainer**: Creates a container with the specified label and automatically sets it as the active
+  container. The returned `containerId` is the label provided. All parameters except `label` are optional.
 
-- **sandbox_executeCommand**: Throws an error if no label is specified and no active container exists. Logs command execution and exit code. Non-zero exit codes are logged as errors but the tool still returns the result.
+- **sandbox_executeCommand**: Throws an error if no label is specified and no active container exists. Logs command
+  execution and exit code. Non-zero exit codes are logged as errors but the tool still returns the result.
 
-- **sandbox_stopContainer**: Throws an error if no label is specified and no active container exists. Clears the active container state after stopping.
+- **sandbox_stopContainer**: Throws an error if no label is specified and no active container exists. Clears the active
+  container state after stopping.
 
 - **sandbox_getLogs**: Throws an error if no label is specified and no active container exists.
 
-- **sandbox_removeContainer**: Throws an error if no label is specified and no active container exists. Removes the label-to-container mapping and clears active container state.
+- **sandbox_removeContainer**: Throws an error if no label is specified and no active container exists. Removes the
+  label-to-container mapping and clears active container state.
 
 ## Chat Commands
 
@@ -259,18 +273,18 @@ The `/sandbox` command provides interactive control in agent chats.
 
 **Actions:**
 
-| Action | Description |
-|--------|-------------|
-| `create <label> [image]` | Create a new container with required label and optional image |
-| `exec <command>` | Execute command in active container (requires active container) |
-| `stop [label]` | Stop container (uses active if unspecified, requires container) |
-| `logs [label]` | Get container logs (uses active if unspecified, requires container) |
-| `remove [label]` | Remove container (uses active if unspecified, requires container) |
-| `status` | Show active container and provider (no active container required) |
-| `provider get` | Show current provider |
-| `provider set <name>` | Set provider by name |
-| `provider reset` | Reset provider to initial configuration |
-| `provider select` | Interactively select provider from available list |
+| Action                   | Description                                                         |
+|--------------------------|---------------------------------------------------------------------|
+| `create <label> [image]` | Create a new container with required label and optional image       |
+| `exec <command>`         | Execute command in active container (requires active container)     |
+| `stop [label]`           | Stop container (uses active if unspecified, requires container)     |
+| `logs [label]`           | Get container logs (uses active if unspecified, requires container) |
+| `remove [label]`         | Remove container (uses active if unspecified, requires container)   |
+| `status`                 | Show active container and provider (no active container required)   |
+| `provider get`           | Show current provider                                               |
+| `provider set <name>`    | Set provider by name                                                |
+| `provider reset`         | Reset provider to initial configuration                             |
+| `provider select`        | Interactively select provider from available list                   |
 
 **Usage Examples:**
 
@@ -399,13 +413,15 @@ The package throws errors in various scenarios:
   [SandboxService] No active provider set
   ```
 
-- **No Container Specified**: When a tool or command requires a container but none is specified and no active container exists
+- **No Container Specified**: When a tool or command requires a container but none is specified and no active container
+  exists
 
   ```
   [sandbox_executeCommand] No container specified and no active container
   ```
 
-- **Command Failed (Tool)**: When a command executes with a non-zero exit code, the tool logs the error via `agent.errorMessage()` but still returns the result with the exit code. The tool does not throw an exception.
+- **Command Failed (Tool)**: When a command executes with a non-zero exit code, the tool logs the error via
+  `agent.errorMessage()` but still returns the result with the exit code. The tool does not throw an exception.
 
 - **Provider Not Found**: When attempting to set a provider that is not registered
 
@@ -419,7 +435,8 @@ The package throws errors in various scenarios:
   No initial provider configured
   ```
 
-- **Command Failed (Chat Command)**: Chat commands throw `CommandFailedError` with usage information when required arguments are missing.
+- **Command Failed (Chat Command)**: Chat commands throw `CommandFailedError` with usage information when required
+  arguments are missing.
 
 - **Unknown Provider Type**: When configuring a provider type that is not implemented in `plugin.ts`
 
@@ -507,7 +524,8 @@ await agent.executeTool('sandbox_executeCommand', {
 
 ### Provider Configuration
 
-The plugin supports configuring sandbox providers at installation time. Currently, only the `docker` provider type is implemented:
+The plugin supports configuring sandbox providers at installation time. Currently, only the `docker` provider type is
+implemented:
 
 ```typescript
 app.install(sandboxPlugin, {
@@ -525,9 +543,11 @@ app.install(sandboxPlugin, {
 });
 ```
 
-**Note**: The plugin currently only supports the `docker` provider type. Attempting to configure other provider types will result in an error: `Unknown sandbox provider type: <type>`
+**Note**: The plugin currently only supports the `docker` provider type. Attempting to configure other provider types
+will result in an error: `Unknown sandbox provider type: <type>`
 
-**Adding new provider types**: To add support for new provider types, modify the switch statement in `plugin.ts` and implement the corresponding provider class.
+**Adding new provider types**: To add support for new provider types, modify the switch statement in `plugin.ts` and
+implement the corresponding provider class.
 
 ## Configuration Options
 
@@ -561,7 +581,9 @@ z.object({
 });
 ```
 
-This schema defines the plugin configuration structure. The `providers` field is optional and allows configuring multiple sandbox providers at installation time. The `agentDefaults` field is required and specifies the default provider for new agents.
+This schema defines the plugin configuration structure. The `providers` field is optional and allows configuring
+multiple sandbox providers at installation time. The `agentDefaults` field is required and specifies the default
+provider for new agents.
 
 #### SandboxAgentConfigSchema
 
@@ -571,29 +593,35 @@ z.object({
 }).default({})
 ```
 
-The `SandboxAgentConfigSchema` defines the per-agent configuration. The `provider` field is optional and allows each agent to have its own active provider setting, which defaults to null if not specified.
+The `SandboxAgentConfigSchema` defines the per-agent configuration. The `provider` field is optional and allows each
+agent to have its own active provider setting, which defaults to null if not specified.
 
 ### SandboxOptions
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `label` | `string` | Optional label for container reference |
-| `image` | `string` | Container image to use (e.g., 'ubuntu:latest') |
-| `workingDir` | `string` | Working directory in container |
-| `environment` | `Record<string, string>` | Environment variables |
-| `timeout` | `number` | Timeout in seconds for operations |
+| Property      | Type                     | Description                                    |
+|---------------|--------------------------|------------------------------------------------|
+| `label`       | `string`                 | Optional label for container reference         |
+| `image`       | `string`                 | Container image to use (e.g., 'ubuntu:latest') |
+| `workingDir`  | `string`                 | Working directory in container                 |
+| `environment` | `Record<string, string>` | Environment variables                          |
+| `timeout`     | `number`                 | Timeout in seconds for operations              |
 
 ## Best Practices
 
-- **Always specify a label when creating containers**: Labels provide a consistent way to reference containers across sessions.
+- **Always specify a label when creating containers**: Labels provide a consistent way to reference containers across
+  sessions.
 
-- **Check for active container before operations**: Before executing commands, stopping, or removing containers, verify that an active container exists or specify a label explicitly.
+- **Check for active container before operations**: Before executing commands, stopping, or removing containers, verify
+  that an active container exists or specify a label explicitly.
 
-- **Use the active container pattern**: After creating a container, it becomes the active container. Subsequent operations without a label will use the active container.
+- **Use the active container pattern**: After creating a container, it becomes the active container. Subsequent
+  operations without a label will use the active container.
 
-- **Handle provider selection carefully**: When multiple providers are configured, use `/sandbox provider select` for interactive selection or `/sandbox provider set <name>` for programmatic selection.
+- **Handle provider selection carefully**: When multiple providers are configured, use `/sandbox provider select` for
+  interactive selection or `/sandbox provider set <name>` for programmatic selection.
 
-- **Clean up unused containers**: Regularly remove unused containers to free up resources using `/sandbox remove` or `sandbox_removeContainer` tool.
+- **Clean up unused containers**: Regularly remove unused containers to free up resources using `/sandbox remove` or
+  `sandbox_removeContainer` tool.
 
 ## Development
 
@@ -671,7 +699,8 @@ export { SandboxService } from "./SandboxService.ts";
 export type { SandboxProvider } from "./SandboxProvider.ts";
 ```
 
-Note: `SandboxService` is exported as the default export from `SandboxService.ts`, so it's imported as `import SandboxService from "./SandboxService.ts"` when used directly.
+Note: `SandboxService` is exported as the default export from `SandboxService.ts`, so it's imported as
+`import SandboxService from "./SandboxService.ts"` when used directly.
 
 ### Plugin Export
 
