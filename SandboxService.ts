@@ -1,6 +1,6 @@
 import type { Agent } from "@tokenring-ai/agent";
 import type { TokenRingService } from "@tokenring-ai/app/types";
-import deepMerge from "@tokenring-ai/utility/object/deepMerge";
+import deepClone from "@tokenring-ai/utility/object/deepClone";
 import KeyedRegistry from "@tokenring-ai/utility/registry/KeyedRegistry";
 import type { MaybePromise } from "bun";
 import type { z } from "zod";
@@ -20,7 +20,7 @@ export default class SandboxService implements TokenRingService {
   constructor(readonly options: z.output<typeof SandboxServiceConfigSchema>) {}
 
   attach(agent: Agent): void {
-    const config = deepMerge(this.options.agentDefaults, agent.getAgentConfigSlice("sandbox", SandboxAgentConfigSchema));
+    const config = deepClone(this.options.agentDefaults, agent.getAgentConfigSlice("sandbox", SandboxAgentConfigSchema));
     agent.initializeState(SandboxState, config);
   }
 
