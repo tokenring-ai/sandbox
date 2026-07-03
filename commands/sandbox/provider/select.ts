@@ -18,7 +18,7 @@ export default {
     const sandbox = agent.requireServiceByType(SandboxService);
     const available = sandbox.getAvailableProviders();
     if (available.length === 0) return "No sandbox providers are registered.";
-    if (available.length === 1) {
+    if (available.length === 1 && available[0]) {
       sandbox.setActiveProvider(available[0], agent);
       return `Only one provider configured, auto-selecting: ${available[0]}`;
     }
@@ -40,7 +40,7 @@ export default {
         tree,
       },
     });
-    if (selection) {
+    if (selection?.[0]) {
       sandbox.setActiveProvider(selection[0], agent);
       return `Active provider set to: ${selection[0]}`;
     }
