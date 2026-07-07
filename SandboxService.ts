@@ -1,5 +1,6 @@
 import type { Agent } from "@tokenring-ai/agent";
 import type { TokenRingService } from "@tokenring-ai/app/types";
+import { ConfigurationError } from "@tokenring-ai/app/types";
 import deepClone from "@tokenring-ai/utility/object/deepClone";
 import KeyedRegistry from "@tokenring-ai/utility/registry/KeyedRegistry";
 import type { MaybePromise } from "bun";
@@ -26,7 +27,7 @@ export default class SandboxService implements TokenRingService {
 
   requireActiveProvider(agent: Agent): SandboxProvider {
     const provider = this.getActiveProvider(agent);
-    if (!provider) throw new Error(`[${this.name}] No active provider set`);
+    if (!provider) throw new ConfigurationError(this.name, `[${this.name}] No active provider set`);
     return provider;
   }
 

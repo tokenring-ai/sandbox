@@ -1,5 +1,6 @@
 import type Agent from "@tokenring-ai/agent/Agent";
 import type { TokenRingToolDefinition, TokenRingToolResult } from "@tokenring-ai/chat/schema";
+import { ToolCallError } from "@tokenring-ai/chat/util/tokenRingTool";
 import { z } from "zod";
 import SandboxService from "../SandboxService.ts";
 
@@ -11,7 +12,7 @@ async function execute({ label }: z.output<typeof inputSchema>, agent: Agent): P
 
   const targetLabel = label || sandbox.getActiveContainer(agent);
   if (!targetLabel) {
-    throw new Error(`[${name}] No container specified and no active container`);
+    throw new ToolCallError(name, `No container specified and no active container`);
   }
 
   agent.infoMessage(`[${name}] Removing container: '${targetLabel}'`);

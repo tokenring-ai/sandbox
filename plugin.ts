@@ -9,7 +9,7 @@ import { SandboxServiceConfigSchema } from "./schema.ts";
 import tools from "./tools.ts";
 
 const packageConfigSchema = z.object({
-  sandbox: SandboxServiceConfigSchema,
+  sandbox: SandboxServiceConfigSchema.exactOptional(),
 });
 
 export default {
