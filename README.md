@@ -637,7 +637,7 @@ bun run build
 bun run test
 ```
 
-The package uses vitest for testing. Test files should be named `*.test.ts` and placed in the package directory.
+The package uses bun test for testing. Test files should be named `*.test.ts` and placed in the package directory.
 
 ### Extending
 
@@ -731,7 +731,7 @@ export default {
 
 ### Development Dependencies
 
-- `vitest`: ^4.1.1
+- `bun test` - Testing framework
 - `typescript`: ^6.0.2
 
 ## License
