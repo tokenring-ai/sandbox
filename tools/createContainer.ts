@@ -23,7 +23,7 @@ async function execute({ label, image, workingDir, environment, timeout }: z.out
 
   agent.infoMessage(`[${name}] Container created: ${result.containerId}`);
   return {
-    summary: `Created sandbox container: ${result.containerId}`,
+    message: `**Sandbox** Created sandbox container ${result.containerId}`,
     result: JSON.stringify(result),
   };
 }

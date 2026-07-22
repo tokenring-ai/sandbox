@@ -23,7 +23,7 @@ async function execute({ label, command }: z.output<typeof inputSchema>, agent: 
   }
 
   return {
-    summary: `Executed command in container ${targetLabel}`,
+    message: `**Sandbox** Executed command in ${targetLabel}`,
     result: JSON.stringify(result),
   };
 }

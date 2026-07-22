@@ -19,7 +19,7 @@ async function execute({ label }: z.output<typeof inputSchema>, agent: Agent): P
   await sandbox.removeContainer(targetLabel, agent);
 
   return {
-    summary: `Removed container ${targetLabel}`,
+    message: `**Sandbox** Removed container ${targetLabel}`,
     result: JSON.stringify({ success: true }),
   };
 }

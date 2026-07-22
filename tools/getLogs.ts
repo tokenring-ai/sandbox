@@ -18,7 +18,7 @@ async function execute({ label }: z.output<typeof inputSchema>, agent: Agent): P
   agent.infoMessage(`[${name}] Getting logs for container: '${targetLabel}'`);
   const result = await sandbox.getLogs(targetLabel, agent);
   return {
-    summary: `Retrieved logs from container ${targetLabel}`,
+    message: `**Sandbox** Retrieved logs from ${targetLabel}`,
     result: JSON.stringify(result),
   };
 }

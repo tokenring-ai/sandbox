@@ -19,7 +19,7 @@ async function execute({ label }: z.output<typeof inputSchema>, agent: Agent): P
   await sandbox.stopContainer(targetLabel, agent);
 
   return {
-    summary: `Stopped container ${targetLabel}`,
+    message: `**Sandbox** Stopped container ${targetLabel}`,
     result: JSON.stringify({ success: true }),
   };
 }
